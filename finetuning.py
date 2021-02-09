@@ -8,16 +8,7 @@ Original file is located at
 
 # Fine tuning of XLSR model for emotion recognition 
 Here at first we download XLSR model; <br> Then we add the layers for the emotion classification on top on the XLSR model; <br> Finally we start with the training of this last layers.
-
-#### Installing packges
-Fairseq must be installed from the git repository since there the version is the 1.0.
-"""
-
-pip install git+https://github.com/pytorch/fairseq.git
-
-pip install torchaudio
-
-"""#### Importing modules"""
+#### Importing modules"""
 
 import torch
 import torchaudio
