@@ -1,0 +1,5 @@
+torch
+torchaudio
+git+https://github.com/pytorch/fairseq.git
+matplotlib
+pandas
