@@ -9,6 +9,7 @@ num_workers = 16
 training_batches = 32
 testing_batches = 64
 num_epoches = 8
+audio_size = 200000
 
 """#### Selecting the right GPU"""
 import os
@@ -18,18 +19,20 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 """#### Importing modules"""
 
 import torch
-import torchaudio
+import torchaudio 
 import fairseq
 from fairseq.models.wav2vec import Wav2VecModel
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from time import time
+from torch.utils.tensorboard import SummaryWriter
 
 """The paths we are going to use in the notebook"""
 
 data_path = "./Assets/Data"
 model_path = "./Assets/Models"
+logs_path = "./Assets/Logs"
 
 """## Downloading the XLSR model."""
 
@@ -133,11 +136,7 @@ classes = {"col": "Guilt",
     "tri": "Sadness",
     "neu": "Neutral"}
 
-dataset = WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS", "DEMoS_dataset"), classes_dict=classes, padding_cropping_size=250000)
-
-dataset[torch.tensor([1,3,56])][0].shape
-
-len(torch.tensor([1,3,56]))
+dataset = WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS", "DEMoS_dataset"), classes_dict=classes, padding_cropping_size=audio_size)
 
 train_dataset, test_dataset = torch.utils.data.random_split(dataset=dataset, lengths=[round(len(dataset)*0.8), len(dataset)-round(len(dataset)*0.8)], 
                                                             generator=torch.Generator().manual_seed(1234))
@@ -147,6 +146,7 @@ train_dataset, test_dataset = torch.utils.data.random_split(dataset=dataset, len
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
+logs_writer = SummaryWriter(os.path.join(logs_path, "first_try_logs"))
 
 for epoch in range(num_epoches):
     print(f" -> Starting epoch {epoch} <- ")
@@ -172,14 +172,14 @@ for epoch in range(num_epoches):
         optimizer.step()
 
         if i % (len(train_loader)//10) == 0:
-            print(f"        Batch {i}, {i//len(train_loader)*100}%; Loss: {loss}")
+            print(f"        Batch {i}, {round(i/len(train_loader)*100)}%; Loss: {loss}")
             if epoch == 0 and i == 0:
                 print(f"          - time for each observation: {round((time() - batch_beginning)/len(labels))} seconds")
 
 
     correct = 0
     total = 0
-    loss = 0
+    val_loss = 0
     with torch.no_grad():
         for batch in val_loader:
             images, labels = batch
@@ -187,11 +187,15 @@ for epoch in range(num_epoches):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            loss += criterion(outputs, labels)/len(val_loader)
+            val_loss += criterion(outputs, labels)/len(val_loader)
 
+    logs_writer.add_scalars('Loss', {'Train':loss,'Validation':val_loss}, epoch)
+    logs_writer.add_scalar('Accuracy', {'Validation':correct/total}, epoch)
     print(f" -> Epoch{epoch}: \n    Loss: {loss}   Accuracy: {correct/total} - epoch time: {int((time() - epoch_beginning)//60)}:{round((time() - epoch_beginning)%60)}")
 
-"""We have almost 3072 in all the Train set this means that we are going to have an execution time for each epoch of training should be around 5 hours and 10 minutes"""
+torch.save(model.state_dict(), os.path.join(model_path, f"first_try_{num_epoches}epochs.pt"))
+
+"""### Testing now:"""
 
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=testing_batches, num_workers=num_workers)
 correct = 0
@@ -205,7 +209,9 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
         loss += criterion(outputs, labels)/len(val_loader)
-            
+
+
+logs_writer.add_scalar('Accuracy', {'Test':correct/total}, num_epoches)
 print(f" ---> On Test data: \n    Loss: {loss}   Accuracy: {correct/total}")
 
-torch.save(model.state_dict(), os.path.join(model_path, "first_try_{num_epoches}epochs.pt"))
+logs_writer.close()
