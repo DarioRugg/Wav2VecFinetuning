@@ -31,7 +31,7 @@ class EmotionClassifier(torch.nn.Module):
         y_pred = self.softmax_activation(self.linear_layer(embedding))
         return y_pred
 
-
+"""
 class SpectrogramCNN(torch.nn.Module):
     def __init__(self, class_number):
 
@@ -87,3 +87,4 @@ class Net(Module):
         x = x.view(x.size(0), -1)
         x = self.linear_layers(x)
         return x
+"""
