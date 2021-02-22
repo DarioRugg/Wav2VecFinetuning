@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Fine tuning of XLSR model for emotion recognition 
 Here at first we download XLSR model; <br> Then we add the layers for the emotion classification on top on the XLSR model; <br> Finally we start with the training of this last layers.
@@ -35,9 +34,9 @@ from torch.utils.tensorboard import SummaryWriter
 
 data_path = "./Assets/Data"
 model_path = "./Assets/Models"
-logs_path = "./Assets/Logs"
+logs_path = "./Logs"
 
-"""## Downloading the XLSR model."""
+"""## Getting the XLSR model."""
 
 xlsr_model_list, cfg = fairseq.checkpoint_utils.load_model_ensemble([os.path.join(model_path, 'xlsr_53_56k.pt')], )
 xlsr_pretrained = xlsr_model_list[0]
