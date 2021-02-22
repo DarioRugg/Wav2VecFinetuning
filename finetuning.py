@@ -14,7 +14,7 @@ audio_size = 200000
 """#### Selecting the right GPU"""
 import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="4"
 
 """#### Importing modules"""
 
@@ -136,7 +136,7 @@ classes = {"col": "Guilt",
     "tri": "Sadness",
     "neu": "Neutral"}
 
-dataset = WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS", "DEMoS_dataset"), classes_dict=classes, padding_cropping_size=audio_size)
+dataset = WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS_dataset"), classes_dict=classes, padding_cropping_size=audio_size)
 
 train_dataset, test_dataset = torch.utils.data.random_split(dataset=dataset, lengths=[round(len(dataset)*0.8), len(dataset)-round(len(dataset)*0.8)], 
                                                             generator=torch.Generator().manual_seed(1234))
