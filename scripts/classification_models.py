@@ -30,3 +30,60 @@ class EmotionClassifier(torch.nn.Module):
             
         y_pred = self.softmax_activation(self.linear_layer(embedding))
         return y_pred
+
+
+class SpectrogramCNN(torch.nn.Module):
+    def __init__(self, class_number):
+
+        super(EmotionClassifier, self).__init__()
+
+        self.cnn_layers = Sequential(
+            self.conv1 = torch.nn.Conv2d(3, 6, 5),
+            self.pool = torch.nn.MaxPool2d(2, 2),
+            self.conv2 = torch.nn.Conv2d(6, 16, 5)
+        )
+
+        self.linear_layers = Sequential(
+            self.fc1 = torch.nn.Linear(16 * 5 * 5, 120),
+            self.fc2 = torch.nn.Linear(120, 84),
+            self.fc3 = torch.nn.Linear(84, class_number)
+        )
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+
+
+class Net(Module):   
+    def __init__(self):
+        super(Net, self).__init__()
+
+        self.cnn_layers = Sequential(
+            # Defining a 2D convolution layer
+            Conv2d(1, 4, kernel_size=3, stride=1, padding=1),
+            BatchNorm2d(4),
+            ReLU(inplace=True),
+            MaxPool2d(kernel_size=2, stride=2),
+            # Defining another 2D convolution layer
+            Conv2d(4, 4, kernel_size=3, stride=1, padding=1),
+            BatchNorm2d(4),
+            ReLU(inplace=True),
+            MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        self.linear_layers = Sequential(
+            Linear(4 * 7 * 7, 10)
+        )
+
+    # Defining the forward pass    
+    def forward(self, x):
+        x = self.cnn_layers(x)
+        x = x.view(x.size(0), -1)
+        x = self.linear_layers(x)
+        return x
