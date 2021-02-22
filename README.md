@@ -13,11 +13,11 @@ python finetuning.py
 ```
 
 ## Assets and data:
-All the models logs and datasets are inside the Assets folder (excluded from the git repository)
+All the models and datasets are inside the Assets folder (excluded from the git repository)
 The structure of the folder is the following:
 
 * Assets
   * Data
-  * Logs
   * Models
 
+the *Logs* folder is instead outside of *Assets* so that is included on the git repository
