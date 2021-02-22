@@ -25,6 +25,9 @@ from fairseq.models.wav2vec import Wav2VecModel
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from scripts.classification_models import EmotionClassifier
+from scripts.dataloaders import WavEmotionDataset
+
 from time import time
 from torch.utils.tensorboard import SummaryWriter
 
@@ -41,32 +44,6 @@ xlsr_pretrained = xlsr_model_list[0]
 
 """## Here the model to fine tune:"""
 
-class EmotionClassifier(torch.nn.Module):
-    def __init__(self, class_number, pretrained_model=None, pretrained_path='xlsr_53_56k.pt', pretrained_out_dim=1024):
-
-        super(EmotionClassifier, self).__init__()
-
-        # First we take the pretrained xlsr model
-        if pretrained_model is None:
-            pretrained_model_list, cfg = fairseq.checkpoint_utils.load_model_ensemble([pretrained_path])
-            pretrained_model = pretrained_model_list[0]
-        
-        self.pretrained_model = pretrained_model
-        self.pretrained_model.eval()
-
-        # then we add on top the classification layers to be trained
-        self.linear_layer = torch.nn.Linear(pretrained_out_dim, class_number)
-        self.softmax_activation = torch.nn.Softmax(dim=0)
-
-    def forward(self, x):
-        with torch.no_grad():
-            # the audio is divided in chunks depending of it's length, 
-            # so we do the mean of all the chunks embeddings to get the final embedding
-            embedding = self.pretrained_model(x, mask=False, features_only=True)["x"].mean(dim=1)
-            
-        y_pred = self.softmax_activation(self.linear_layer(embedding))
-        return y_pred
-
 number_of_classes = 8
 
 model = EmotionClassifier(class_number=8, pretrained_model=xlsr_pretrained)
@@ -75,58 +52,6 @@ model = EmotionClassifier(class_number=8, pretrained_model=xlsr_pretrained)
 
 ### Building the dataset object:
 """
-
-class WavEmotionDataset(torch.utils.data.Dataset):
-
-    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, transform=None):
-        """
-        Args:
-            root_dir (string): Directory with all the DEMoS audio files.
-            classes_dict (dict): dictionary class label -> meaning.
-            padding_cropping_size (int): size to crop and pad, in order to have all wavs of the same length.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
-        demos_dir = os.path.join(root_dir, "DEMOS")
-        neu_dir = os.path.join(root_dir, "NEU")
-
-        self.classes = sorted(list(classes_dict.keys()))
-        self.classes_dict = classes_dict
-        self.transform = transform
-        self.padding_cropping_size = padding_cropping_size
-
-        paths = list(map(lambda fname: os.path.join(demos_dir, fname), sorted(os.listdir(demos_dir)))) + list(map(lambda fname: os.path.join(neu_dir, fname), sorted(os.listdir(neu_dir))))
-        labels = list(map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(demos_dir)))) + list(map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(neu_dir))))
-
-        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
-
-    def __len__(self):
-        return len(self.wav_path_label_df)
-
-    def __getitem__(self, idx):
-
-        def _padding_cropping(input_wav, size):
-            if len(input_wav) > size:
-                input_wav = input_wav[:size]
-            elif len(input_wav) < size:
-                input_wav = torch.nn.ConstantPad1d(padding=(0, size - len(input_wav)), value=0)(input_wav)
-            return input_wav
-
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-            X = torch.stack(list(map(lambda audio_path: _padding_cropping(torch.squeeze(torchaudio.load(audio_path)[0], dim=0), self.padding_cropping_size) if self.padding_cropping_size is not None 
-                                     else torch.squeeze(torchaudio.load(audio_path)[0], dim=0), self.wav_path_label_df.iloc[idx, 0])))
-            y = torch.tensor(self.wav_path_label_df.iloc[idx, 1].tolist())
-
-        else:
-            X = _padding_cropping(torch.squeeze(torchaudio.load(self.wav_path_label_df.iloc[idx, 0])[0], dim=0), self.padding_cropping_size) if self.padding_cropping_size is not None else torch.squeeze(torchaudio.load(self.wav_path_label_df.iloc[idx, 0])[0], dim=0)
-            y = self.wav_path_label_df.iloc[idx, 1]
-
-        if self.transform:
-            X = self.transform(X)
-
-        return X, y
-
 classes = {"col": "Guilt",
     "dis": "Disgust",
     "gio": "Happiness",
