@@ -31,25 +31,42 @@ class EmotionClassifier(torch.nn.Module):
         y_pred = self.softmax_activation(self.linear_layer(embedding))
         return y_pred
 
-"""
+
 class SpectrogramCNN(torch.nn.Module):
     def __init__(self, class_number):
 
         super(EmotionClassifier, self).__init__()
 
-        self.cnn_layers = Sequential(
-            self.conv1 = torch.nn.Conv2d(3, 6, 5),
-            self.pool = torch.nn.MaxPool2d(2, 2),
-            self.conv2 = torch.nn.Conv2d(6, 16, 5)
+        self.cnn_layers = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            
+            torch.nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            
+            torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            
+            torch.nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            
+            torch.nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
         )
 
-        self.linear_layers = Sequential(
-            self.fc1 = torch.nn.Linear(16 * 5 * 5, 120),
-            self.fc2 = torch.nn.Linear(120, 84),
-            self.fc3 = torch.nn.Linear(84, class_number)
+        self.linear_layers = torch.nn.Sequential(
+            torch.nn.Linear(0, 120), # we must add the input size after all the striding and pooling 
+            torch.nn.Linear(120, 84),
+            torch.nn.Linear(84, class_number)
         )
 
     def forward(self, x):
+        x = torch.nn.Sequential(
+            self.cnn_layers
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)
@@ -59,7 +76,7 @@ class SpectrogramCNN(torch.nn.Module):
         return x
 
 
-
+"""
 class Net(Module):   
     def __init__(self):
         super(Net, self).__init__()
