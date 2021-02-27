@@ -34,7 +34,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 data_path = "./Assets/Data"
 model_path = "./Assets/Models"
-logs_path = "./Logs"
+logs_path = "./Assets/Logs"
 
 """### Logs writer:"""
 
