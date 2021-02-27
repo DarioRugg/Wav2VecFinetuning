@@ -1,3 +1,7 @@
-/Assets
-/.vscode
-!Assets/logs
+# ignoring project config directories:
+.idea
+.vscode
+
+# ignoring Data and Models directories in Assets since them are really heavy
+Assets/*
+!Assets/Logs
