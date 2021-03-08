@@ -5,3 +5,4 @@
 # ignoring Data and Models directories in Assets since them are really heavy
 Assets/*
 !Assets/Logs
+!Assets/Configs

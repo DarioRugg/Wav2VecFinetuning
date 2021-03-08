@@ -41,7 +41,7 @@ class SpectrogramCNN(torch.nn.Module):
             torch.nn.ReLU(),
 
             torch.nn.Linear(84, class_number),
-            torch.nn.Softmax()
+            torch.nn.Softmax(dim=1)
         )
 
 
