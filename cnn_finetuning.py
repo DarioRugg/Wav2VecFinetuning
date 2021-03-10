@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     logs_writer = SummaryWriter(os.path.join(logs_path, f"{simulation_name}_logs"))
 
-    best_model = {"dict": None, "epoch": None, "loss": None, "accuracy": None}
+    best_model = None
     for epoch in range(num_epoches):
         print(f" -> Starting epoch {epoch} <- ")
         epoch_beginning = time()
@@ -116,9 +116,10 @@ if __name__ == '__main__':
         logs_writer.add_scalars('Accuracy', {'Validation':correct/total}, epoch)
         print(f" -> Epoch{epoch}: \n    Loss: {loss}   Accuracy: {correct/total} - epoch time: {int((time() - epoch_beginning)//60)}:{round((time() - epoch_beginning)%60)}")
 
-        if best_model is None or loss < best_model["loss"]:
+        if best_model is None or loss < best_model["Loss"]:
             best_model = {"State_Dict": model.state_dict(), "Epoch": epoch, "Loss": loss, "Accuracy": correct/total}
 
     # ----> saving models at the end of the trainging <------
-    torch.save(model.state_dict(), os.path.join(model_path, f"{simulation_name}_best_model.pt")) # best model
+    print(f"Saving models, best model found at epoch {best_model['Epoch']} with Loss {round(best_model['Loss'], 4)} and Accuracy {round(best_model['Accuracy'], 2)} on val")
+    torch.save(best_model["State_Dict"], os.path.join(model_path, f"{simulation_name}_best_model.pt")) # best model
     torch.save(model.state_dict(), os.path.join(model_path, f"{simulation_name}_last_model_{num_epoches}epochs.pt")) # last epoch model
