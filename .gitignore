@@ -6,3 +6,6 @@
 Assets/*
 !Assets/Logs
 !Assets/Configs
+
+# Let's ignore the home tests
+Assets/Logs/home_test/*

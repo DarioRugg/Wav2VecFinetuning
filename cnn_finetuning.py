@@ -24,7 +24,7 @@ if __name__ == '__main__':
     conf_path = join(".", "Assets", "Configs")
 
     # ------> Loading the proper config <-------
-    conf_file = "server_config.json"
+    conf_file = "home_config.json"
     with open(join(conf_path, conf_file)) as f:
         conf = json.load(f)
 
@@ -79,8 +79,6 @@ if __name__ == '__main__':
         val_loader = torch.utils.data.DataLoader(train_split, batch_size=testing_batches, num_workers=num_workers)
 
         for i, batch in enumerate(train_loader):
-            batch_beginning = time()
-
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = batch
 
@@ -95,9 +93,9 @@ if __name__ == '__main__':
 
             if i % (len(train_loader)//10) == 0:
                 print(f"        Batch {i}, {round(i/len(train_loader)*100)}%; Loss: {loss}")
-                if epoch == 0 and i == 0:
-                    print(f"          - time for each observation: {round((time() - batch_beginning)/len(labels), 3)} seconds")
-                    print(f"            in total should take around {round((time() - batch_beginning)/len(labels)*len(train_dataset), 3)} seconds")
+                if epoch == 0:
+                    total_time = (time() - epoch_beginning)/labels.size(0)*len(train_dataset)*num_epoches
+                    print(f"          - In total it should take around {round(total_time/60)} minutes")
 
 
         correct = 0
@@ -114,12 +112,15 @@ if __name__ == '__main__':
 
         logs_writer.add_scalars('Loss', {'Train':loss,'Validation':val_loss}, epoch)
         logs_writer.add_scalars('Accuracy', {'Validation':correct/total}, epoch)
-        print(f" -> Epoch{epoch}: \n    Loss: {loss}   Accuracy: {correct/total} - epoch time: {int((time() - epoch_beginning)//60)}:{round((time() - epoch_beginning)%60)}")
+        print(f"    Epoch {epoch} summary: \n    Loss: {val_loss}   Accuracy: {correct/total} - epoch time: {int((time() - epoch_beginning)//60)}:{int((time() - epoch_beginning)%60)}")
+        
 
-        if best_model is None or loss < best_model["Loss"]:
-            best_model = {"State_Dict": model.state_dict(), "Epoch": epoch, "Loss": loss, "Accuracy": correct/total}
+        if best_model is None or val_loss < best_model["Loss"]:
+            best_model = {"State_Dict": model.state_dict(), "Epoch": epoch, "Loss": val_loss.item(), "Accuracy": correct/total}
+
 
     # ----> saving models at the end of the trainging <------
-    print(f"Saving models, best model found at epoch {best_model['Epoch']} with Loss {round(best_model['Loss'], 4)} and Accuracy {round(best_model['Accuracy'], 2)} on val")
+    print(f"Saving models, best model found at epoch {best_model['Epoch']} with Loss {round(best_model['Loss'], 4)} and Accuracy {round(best_model['Accuracy'], 4)} on val")
+
     torch.save(best_model["State_Dict"], os.path.join(model_path, f"{simulation_name}_best_model.pt")) # best model
     torch.save(model.state_dict(), os.path.join(model_path, f"{simulation_name}_last_model_{num_epoches}epochs.pt")) # last epoch model
