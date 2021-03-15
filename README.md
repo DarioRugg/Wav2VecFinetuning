@@ -24,3 +24,5 @@ The structure of the folder is the following:
 
 
 The folders Data and Models are not in the repository since them are too heavy.
+
+for the home test the directory "home_test" inside Logs/ is excluded from git
