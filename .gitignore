@@ -1,6 +1,7 @@
 # ignoring project config directories:
 .idea
 .vscode
+scripts/__pycache__/*
 
 # ignoring Data and Models directories in Assets since them are really heavy
 Assets/*
