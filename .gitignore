@@ -8,4 +8,4 @@ Assets/*
 !Assets/Configs
 
 # Let's ignore the home tests
-Assets/Logs/home_test/*
+Assets/Logs/home_test_logs/*

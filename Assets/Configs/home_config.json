@@ -1,9 +1,0 @@
-{
-    "simulation_name": "home_test",
-    "num_workers": 16,
-    "training_batches": 32,
-    "testing_batches": 64,
-    "num_epoches": 8,
-    "audio_size": 200000,
-    "train_test_split_seed": 1234
-}

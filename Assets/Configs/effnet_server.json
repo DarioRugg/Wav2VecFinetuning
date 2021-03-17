@@ -1,0 +1,18 @@
+{
+    "simulation_name": "Efficientnet-b8",
+    "num_epoches": 24,
+
+    "model": "effnet",
+    "model_arch": "efficientnet-b8",
+    
+    "dataset": "DEMoS",
+    "audio_size": 200000,
+    "use_spectrogram": true,
+    "train_test_split_size": 0.8,
+    "train_test_split_seed": 1234,
+
+    "num_workers": 16,
+    "training_batches": 32,
+    "testing_batches": 32,
+    "server_config": "server_config.json"
+}
