@@ -1,9 +1,9 @@
 {
-    "simulation_name": "Efficientnet-b8",
+    "simulation_name": "Efficientnet-b6",
     "num_epoches": 24,
 
     "model": "effnet",
-    "model_arch": "efficientnet-b8",
+    "model_arch": "efficientnet-b6",
     
     "dataset": "DEMoS",
     "audio_size": 200000,
