@@ -10,7 +10,7 @@ the dataloader below is for loading the DEMoS dataset.
 
 class WavEmotionDataset(torch.utils.data.Dataset):
 
-    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, specrtrogram=False, transform=None):
+    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, specrtrogram=False, sampling_rate=None, transform=None):
         """
         Args:
             root_dir (string): Directory with all the DEMoS audio files.
@@ -36,6 +36,7 @@ class WavEmotionDataset(torch.utils.data.Dataset):
         self.classes_dict = classes_dict
         self.padding_cropping_size = padding_cropping_size
         self.get_spectrogram = specrtrogram
+        self.sampling_rate = sampling_rate
         self.transform = transform
 
         paths = list(map(lambda fname: os.path.join(demos_dir, fname), sorted(os.listdir(demos_dir)))) + list(map(lambda fname: os.path.join(neu_dir, fname), sorted(os.listdir(neu_dir))))
@@ -60,7 +61,7 @@ class WavEmotionDataset(torch.utils.data.Dataset):
                     input_wav = np.pad(input_wav, pad_width=(0, size-len(input_wav)), constant_values=0)
                 return input_wav
 
-            y, sr = librosa.load(audio_path, sr=None)
+            y, sr = librosa.load(audio_path, sr=self.sampling_rate) # if sr None, sr will be 44100Hz 
 
             if padd_crop_size is not None:
                 y = _padding_cropping(y, padd_crop_size)

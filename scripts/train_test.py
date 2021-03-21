@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 import json
 
 from scripts.classification_models import SpectrogramCNN
+from scripts.wav2vec_model import Wav2VecClassifier
 from efficientnet_pytorch import EfficientNet
 from scripts.librosa_dataloaders import WavEmotionDataset
 
@@ -41,6 +42,7 @@ def train(conf_file):
     dataset_name = conf["dataset"]
     audio_size = conf["audio_size"]
     spectrogram_flag = conf["use_spectrogram"]
+    sampling_rate = conf["sampling_rate"] if "sampling_rate" in conf.keys() else None
     train_split_size = conf["train_test_split_size"]
     split_seed = conf["train_test_split_seed"]
 
@@ -53,7 +55,7 @@ def train(conf_file):
 
 
     # ------------------> Dataset <-----------------------
-    dataset = _get_dataset(dataset=dataset_name, pad_crop_size=audio_size, specrtrogram=spectrogram_flag)
+    dataset = _get_dataset(dataset=dataset_name, pad_crop_size=audio_size, specrtrogram=spectrogram_flag, sampling_rate=sampling_rate)
 
     train_dataset = _get_dataset_split(data=dataset, part="train", split_size=train_split_size, seed=split_seed)
 
@@ -149,6 +151,7 @@ def test(conf_file):
     dataset_name = conf["dataset"]
     audio_size = conf["audio_size"]
     spectrogram_flag = conf["use_spectrogram"]
+    sampling_rate = conf["sampling_rate"] if "sampling_rate" in conf.keys() else None
     split_seed = conf["train_test_split_seed"]
     train_split_size = conf["train_test_split_size"]
 
@@ -163,13 +166,13 @@ def test(conf_file):
     
     # ------------------> Dataset <-----------------------
 
-    dataset = _get_dataset(dataset=dataset_name, pad_crop_size=audio_size, specrtrogram=spectrogram_flag)
+    dataset = _get_dataset(dataset=dataset_name, pad_crop_size=audio_size, specrtrogram=spectrogram_flag, sampling_rate=sampling_rate)
 
     test_dataset = _get_dataset_split(data=dataset, part="test", split_size=train_split_size, seed=split_seed)
 
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=testing_batches, num_workers=num_workers)
 
-
+    
     # ------------------> Model <-----------------------
 
     number_of_classes = len(dataset.get_classes())
@@ -214,12 +217,14 @@ def _get_model(model_name, num_classes, model_arch=None):
         return SpectrogramCNN(input_size=(1, 128, 391), class_number=num_classes)
     elif model_name.lower() == "effnet":
         return EfficientNet.from_pretrained(model_name=model_arch, in_channels=1, num_classes=num_classes)
+    elif model_name.lower() == "wav2vec":
+        return Wav2VecClassifier(num_classes=num_classes)
 
-def _get_dataset(dataset, pad_crop_size, specrtrogram=False):
+def _get_dataset(dataset, pad_crop_size, specrtrogram=False, sampling_rate=None):
     if dataset.lower() == "demos":
-        return WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS_dataset"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram)
+        return WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS_dataset"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
     elif dataset.lower() == "demos_short_test":
-        return WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS_dataset_short_test"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram)
+        return WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS_dataset_short_test"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
 
 def _get_dataset_split(data, part, split_size, seed):
     train_dataset, test_dataset = torch.utils.data.random_split(dataset=data, lengths=[round(len(data)*split_size), len(data)-round(len(data)*split_size)], 
