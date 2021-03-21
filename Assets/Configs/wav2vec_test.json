@@ -6,7 +6,7 @@
     
     "dataset": "DEMoS_short_test",
     "audio_size": 3500,
-    "use_spectrogram": true,
+    "use_spectrogram": false,
     "train_test_split_size": 0.8,
     "train_test_split_seed": 1234,
 
