@@ -2,7 +2,6 @@
 
 import torch
 
-from efficientnet_pytorch import EfficientNet
 from scripts.librosa_dataloaders import WavEmotionDataset
 
 from time import time

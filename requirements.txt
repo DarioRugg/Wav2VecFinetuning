@@ -1,6 +1,7 @@
 torch
-torchaudio
-git+https://github.com/pytorch/fairseq.git
-matplotlib
+efficientnet_pytorch
+transformers
+librosa
 pandas
+numpy
 tensorboard
