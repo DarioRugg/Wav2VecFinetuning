@@ -67,9 +67,9 @@ class WavEmotionDataset(torch.utils.data.Dataset):
                 y = _padding_cropping(y, padd_crop_size)
 
             if get_spectrogrm:
-                y = librosa.feature.melspectrogram(y=y, sr=sr)
+                y = np.expand_dims(librosa.feature.melspectrogram(y=y, sr=sr), axis=0) # expand dim to have the channels dimension (1 channel since is a spectrogram)
 
-            return torch.unsqueeze(torch.tensor(y), 0)
+            return torch.tensor(y) # we must return a tensor rather than a np array
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -79,7 +79,7 @@ class WavEmotionDataset(torch.utils.data.Dataset):
 
         else:
             X = _get_data_from_file(self.wav_path_label_df.iloc[idx, 0], padd_crop_size=self.padding_cropping_size, get_spectrogrm=self.get_spectrogram)
-            y = self.wav_path_label_df.iloc[idx, 1]
+            y = torch.tensor(self.wav_path_label_df.iloc[idx, 1])
 
         if self.transform:
             X = self.transform(X)
