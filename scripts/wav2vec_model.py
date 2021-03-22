@@ -22,7 +22,6 @@ class Wav2VecClassifier(torch.nn.Module):
         with torch.no_grad():
             # the audio is divided in chunks depending of it's length, 
             # so we do the mean of all the chunks embeddings to get the final embedding
-            embedding = self.pretrained_model(x, mask=False, features_only=True)["x"].mean(dim=1)
             embedding = self.pretrained_model( x ).last_hidden_state.mean(dim=1)
             
         y_pred = self.softmax_activation(self.linear_layer(embedding))
