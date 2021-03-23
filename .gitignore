@@ -1,8 +1,7 @@
 # ignoring project config directories:
-/.idea/
-/.vscode/
-# **/__pycache__/
-__pycache__/
+**/.idea/
+**/.vscode/
+**/__pycache__/
 
 # ignoring Data and Models directories in Assets since them are really heavy
 /Assets/*
@@ -13,8 +12,7 @@ __pycache__/
 /Assets/Logs/home_test_logs/
 
 # Let's ignore the notebook for testing
-/testing_nb.ipynb
-/home_main.py
+/*_home.*
 
 /Assets/Configs/*_home.json
 /Assets/Configs/*_test.json
