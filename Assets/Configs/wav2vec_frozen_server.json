@@ -3,9 +3,11 @@
     "num_epoches": 24,
 
     "model": "wav2vec",
+    "model_arch": "all_frozen",
     
     "dataset": "DEMoS",
     "audio_size": 72562, 
+    "sampling_rate": 16000,
     "use_spectrogram": false,
     "train_test_split_size": 0.8,
     "train_test_split_seed": 1234,
