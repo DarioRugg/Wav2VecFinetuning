@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 import json
 
 from scripts.classification_models import SpectrogramCNN
-from scripts.wav2vec_model import Wav2VecClassifier
+from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractor
 from efficientnet_pytorch import EfficientNet
 from scripts.librosa_dataloaders import WavEmotionDataset
 
@@ -217,7 +217,12 @@ def _get_model(model_name, num_classes, model_arch=None):
     elif model_name.lower() == "effnet":
         return EfficientNet.from_pretrained(model_name=model_arch, in_channels=1, num_classes=num_classes)
     elif model_name.lower() == "wav2vec":
-        return Wav2VecClassifier(num_classes=num_classes)
+        if model_arch == "all_frozen":
+            return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=False)
+        elif model_arch == "just_cnn":
+            return Wav2VecFeatureExtractor(num_classes=num_classes)
+        elif model_arch == "complete_finetuning":
+            return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=True)
 
 def _get_dataset(dataset, pad_crop_size, specrtrogram=False, sampling_rate=None):
     if dataset.lower() == "demos":
