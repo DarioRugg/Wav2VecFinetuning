@@ -1,5 +1,5 @@
 {
-    "simulation_name": "Efficientnet-b6",
+    "simulation_name": "Wav2Vec",
     "num_epoches": 24,
 
     "model": "wav2vec",
