@@ -1,0 +1,19 @@
+{
+    "simulation_name": "Wav2Vec_finetuning_cnn_feezing_encoder",
+    "num_epoches": 24,
+
+    "model": "wav2vec",
+    "model_arch": "finetuning_convs_frozen_encoder",
+    
+    "dataset": "DEMoS",
+    "audio_size": 72562, 
+    "sampling_rate": 16000,
+    "use_spectrogram": false,
+    "train_test_split_size": 0.8,
+    "train_test_split_seed": 1234,
+
+    "num_workers": 16,
+    "training_batches": 32,
+    "testing_batches": 32,
+    "server_config": "server_config.json"
+}

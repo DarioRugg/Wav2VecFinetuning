@@ -53,3 +53,24 @@ class Wav2VecFeatureExtractor(torch.nn.Module):
         y_pred = self.softmax_activation(self.linear_layer(embedding))
         return y_pred
 
+
+class Wav2VecFeezingEncoderOnly(torch.nn.Module):
+    def __init__(self, num_classes, pretrained_out_dim=1024):
+
+        super(Wav2VecFeezingEncoderOnly, self).__init__()
+
+        # First we take the pretrained xlsr model        
+        self.pretrained_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-large-xlsr-53")
+        
+        self.pretrained_model.encoder.eval()
+
+        # then we add on top the classification layers to be trained
+        self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
+        self.softmax_activation = torch.nn.Softmax(dim=0)
+
+    def forward(self, x):
+        
+        embedding = self.pretrained_model( x ).last_hidden_state.mean(dim=1)
+            
+        y_pred = self.softmax_activation(self.linear_layer(embedding))
+        return y_pred
