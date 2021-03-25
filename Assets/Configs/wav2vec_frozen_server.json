@@ -3,7 +3,7 @@
     "num_epoches": 24,
 
     "model": "wav2vec",
-    "model_arch": "all_frozen",
+    "model_arch": "complete",
     
     "dataset": "DEMoS",
     "audio_size": 72562, 

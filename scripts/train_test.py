@@ -81,6 +81,9 @@ def train(conf_file):
         train_loader = torch.utils.data.DataLoader(train_split, batch_size=training_batches, num_workers=num_workers)
         val_loader = torch.utils.data.DataLoader(val_split, batch_size=testing_batches, num_workers=num_workers)
 
+        # in train model for training
+        model.train()
+
         train_loss = 0
         for i, batch in enumerate(train_loader):
             # get the inputs; data is a list of [inputs, labels]
@@ -102,6 +105,8 @@ def train(conf_file):
                     print(f"          - In total it should take around {round(total_time/60)} minutes")
             train_loss += loss.item()/len(train_loader)
 
+        # model eval before validation round 
+        model.eval()
 
         correct = 0
         total = 0
@@ -178,6 +183,9 @@ def test(conf_file):
 
     model = _get_model(model_name=model_name, num_classes=number_of_classes, model_arch=model_architecture)
 
+    # we just wnat to test the model
+    model.eval()
+
     model = model.to(device)
 
     model.load_state_dict(torch.load(os.path.join(model_path, f"{simulation_name}_best_model.pt")))
@@ -217,12 +225,14 @@ def _get_model(model_name, num_classes, model_arch=None):
     elif model_name.lower() == "effnet":
         return EfficientNet.from_pretrained(model_name=model_arch, in_channels=1, num_classes=num_classes)
     elif model_name.lower() == "wav2vec":
-        if model_arch == "all_frozen":
+        if model_arch == "complete":
             return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=False)
-        elif model_arch == "just_cnn":
-            return Wav2VecFeatureExtractor(num_classes=num_classes)
         elif model_arch == "complete_finetuning":
             return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=True)
+        elif model_arch == "just_cnn":
+            return Wav2VecFeatureExtractor(num_classes=num_classes, finetune_pretrained=False)
+        elif model_arch == "just_cnn_finetuning":
+            return Wav2VecFeatureExtractor(num_classes=num_classes, finetune_pretrained=True)
         elif model_arch == "finetuning_convs_frozen_encoder":
             return Wav2VecFeezingEncoderOnly(num_classes=num_classes)
 
