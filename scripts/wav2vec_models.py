@@ -33,6 +33,10 @@ class Wav2VecComplete(torch.nn.Module):
         else: self.pretrained_model.eval()
 
         self.linear_layer.train()
+    
+    def eval(self):
+        self.pretrained_model.eval()
+        self.linear_layer.eval()
 
 
 class Wav2VecFeatureExtractor(torch.nn.Module):
@@ -65,6 +69,11 @@ class Wav2VecFeatureExtractor(torch.nn.Module):
         else: self.pretrained_model.eval()
 
         self.linear_layer.train()
+    
+    def eval(self):
+        self.pretrained_model.eval()
+        self.linear_layer.eval()
+
 
 
 class Wav2VecFeezingEncoderOnly(torch.nn.Module):
@@ -94,3 +103,7 @@ class Wav2VecFeezingEncoderOnly(torch.nn.Module):
         self.pretrained_model.feature_projection.train()
         
         self.linear_layer.train()
+    
+    def eval(self):
+        self.pretrained_model.eval()
+        self.linear_layer.eval()
