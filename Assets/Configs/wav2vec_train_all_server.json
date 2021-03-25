@@ -13,7 +13,7 @@
     "train_test_split_seed": 1234,
 
     "num_workers": 16,
-    "training_batches": 32,
+    "training_batches": 16,
     "testing_batches": 32,
     "server_config": "server_config.json"
 }

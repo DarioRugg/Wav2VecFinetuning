@@ -74,11 +74,6 @@ class Wav2VecFeezingEncoderOnly(torch.nn.Module):
 
         # First we take the pretrained xlsr model        
         self.pretrained_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-large-xlsr-53")
-        
-        self.pretrained_model.encoder.eval()
-
-        self.pretrained_model.feature_extractor.train()
-        self.pretrained_model.feature_projection.train()
 
         # then we add on top the classification layers to be trained
         self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
