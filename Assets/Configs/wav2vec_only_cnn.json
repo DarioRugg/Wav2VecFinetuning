@@ -1,11 +1,11 @@
 {
-    "simulation_name": "Wav2Vec_finetuning_cnn_feezing_encoder",
+    "simulation_name": "Wav2Vec_cnn_only_finetuning",
     "num_epoches": 24,
 
     "model": "wav2vec",
-    "model_arch": "finetuning_convs_frozen_encoder",
+    "model_arch": "just_cnn_finetuning",
     
-    "dataset": "DEMoS",
+    "dataset": "RAVDESS",
     "audio_size": 72562, 
     "sampling_rate": 16000,
     "use_spectrogram": false,

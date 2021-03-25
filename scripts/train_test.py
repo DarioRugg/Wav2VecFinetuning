@@ -2,7 +2,7 @@
 
 import torch
 
-from scripts.librosa_dataloaders import WavEmotionDataset
+from scripts.librosa_dataloaders import DEMoSDataset, RAVDESSDataset
 
 from time import time
 from os.path import join
@@ -13,7 +13,6 @@ import json
 from scripts.classification_models import SpectrogramCNN
 from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractor, Wav2VecFeezingEncoderOnly
 from efficientnet_pytorch import EfficientNet
-from scripts.librosa_dataloaders import WavEmotionDataset
 
 
 """The paths we are going to use in the notebook"""
@@ -238,9 +237,11 @@ def _get_model(model_name, num_classes, model_arch=None):
 
 def _get_dataset(dataset, pad_crop_size, specrtrogram=False, sampling_rate=None):
     if dataset.lower() == "demos":
-        return WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS_dataset"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
+        return DEMoSDataset(root_dir=os.path.join(data_path, "DEMoS_dataset"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
+    elif dataset.lower() == "ravdess":
+        return RAVDESSDataset(root_dir=os.path.join(data_path, "RAVDESS_dataset"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
     elif dataset.lower() == "demos_short_test":
-        return WavEmotionDataset(root_dir=os.path.join(data_path, "DEMoS_dataset_short_test"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
+        return DEMoSDataset(root_dir=os.path.join(data_path, "DEMoS_dataset_short_test"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
 
 def _get_dataset_split(data, part, split_size, seed):
     train_dataset, test_dataset = torch.utils.data.random_split(dataset=data, lengths=[round(len(data)*split_size), len(data)-round(len(data)*split_size)], 

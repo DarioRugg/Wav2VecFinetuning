@@ -5,7 +5,7 @@
     "model": "wav2vec",
     "model_arch": "complete_finetuning",
     
-    "dataset": "DEMoS",
+    "dataset": "RAVDESS",
     "audio_size": 72562, 
     "sampling_rate": 16000,
     "use_spectrogram": false,

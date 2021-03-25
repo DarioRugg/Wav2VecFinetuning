@@ -1,54 +1,35 @@
+from scipy.signal.spectral import spectrogram
 import torch
 import librosa
 import pandas as pd
 import numpy as np
 import os
+import itertools
 
 """
-the dataloader below is for loading the DEMoS dataset.
+The generic Dataset class with all the methods needed in the other specific Datasets
 """
+class BaseDataset(torch.utils.data.Dataset):
 
-class WavEmotionDataset(torch.utils.data.Dataset):
-
-    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, specrtrogram=False, sampling_rate=None, transform=None):
+    def __init__(self, padding_cropping_size=None, specrtrogram=False, sampling_rate=None, transform=None):
         """
         Args:
             root_dir (string): Directory with all the DEMoS audio files.
-            classes_dict (dict): dictionary class label -> meaning, if None default classes are used.
             padding_cropping_size (int): size to crop and pad, in order to have all wavs of the same length.
             spectrogram (bool): if True gets out the spectrogram instead of the raw sampling
             transform (callable, optional): Optional transform to be applied on a sample.
         """
-        demos_dir = os.path.join(root_dir, "DEMOS")
-        neu_dir = os.path.join(root_dir, "NEU")
 
-        if classes_dict is None:
-            classes_dict = {"col": "Guilt",
-                        "dis": "Disgust",
-                        "gio": "Happiness",
-                        "pau": "Fear",
-                        "rab": "Anger",
-                        "sor": "Surprise",
-                        "tri": "Sadness",
-                        "neu": "Neutral"}
-
-        self.classes = sorted(list(classes_dict.keys()))
-        self.classes_dict = classes_dict
         self.padding_cropping_size = padding_cropping_size
         self.get_spectrogram = specrtrogram
         self.sampling_rate = sampling_rate
         self.transform = transform
 
-        paths = list(map(lambda fname: os.path.join(demos_dir, fname), sorted(os.listdir(demos_dir)))) + list(map(lambda fname: os.path.join(neu_dir, fname), sorted(os.listdir(neu_dir))))
-        labels = list(map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(demos_dir)))) + list(map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(neu_dir))))
-
-        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
-
     def __len__(self):
         return len(self.wav_path_label_df)
 
     def get_classes(self):
-        return self.classes
+        return self.classes_dict
 
     def __getitem__(self, idx):
 
@@ -88,3 +69,81 @@ class WavEmotionDataset(torch.utils.data.Dataset):
     
     def _get_data_from_file(audio_path):
         return torch.tensor(librosa.load(audio_path, sr=None)[0])
+
+
+"""
+the dataloader below is for loading the DEMoS dataset.
+"""
+class DEMoSDataset(BaseDataset):
+
+    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, specrtrogram=False, sampling_rate=None, transform=None):
+        """
+        Args:
+            root_dir (string): Directory with all the DEMoS audio files.
+            classes_dict (dict): dictionary class label -> meaning, if None default classes are used.
+            padding_cropping_size (int): size to crop and pad, in order to have all wavs of the same length.
+            spectrogram (bool): if True gets out the spectrogram instead of the raw sampling
+            transform (callable, optional): Optional transform to be applied on a sample.
+        """
+
+        super().__init__(padding_cropping_size, specrtrogram, sampling_rate, transform)
+
+        demos_dir = os.path.join(root_dir, "DEMOS")
+        neu_dir = os.path.join(root_dir, "NEU")
+
+        if classes_dict is None:
+            classes_dict = {"col": "Guilt",
+                        "dis": "Disgust",
+                        "gio": "Happiness",
+                        "pau": "Fear",
+                        "rab": "Anger",
+                        "sor": "Surprise",
+                        "tri": "Sadness",
+                        "neu": "Neutral"}
+
+        self.classes = sorted(list(classes_dict.keys()))
+        self.classes_dict = classes_dict
+
+        paths = list(map(lambda fname: os.path.join(demos_dir, fname), sorted(os.listdir(demos_dir)))) + list(map(lambda fname: os.path.join(neu_dir, fname), sorted(os.listdir(neu_dir))))
+        labels = list(map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(demos_dir)))) + list(map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(neu_dir))))
+
+        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
+
+
+"""
+the dataloader below is for loading the RAVDESS dataset.
+"""
+class RAVDESSDataset(BaseDataset):
+
+    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, specrtrogram=False, sampling_rate=None, transform=None):
+        """
+        Args:
+            root_dir (string): Directory with all the DEMoS audio files.
+            classes_dict (dict): dictionary class label -> meaning, if None default classes are used.
+            padding_cropping_size (int): size to crop and pad, in order to have all wavs of the same length.
+            spectrogram (bool): if True gets out the spectrogram instead of the raw sampling
+            transform (callable, optional): Optional transform to be applied on a sample.
+        """
+
+        super().__init__(padding_cropping_size, specrtrogram, sampling_rate, transform)
+
+        # originally the labels idex were starting from 1 but the the loss finction are used to lables from 0
+        if classes_dict is None:
+            classes_dict = {0: "neutral",
+                        1: "calm",
+                        2: "happy",
+                        3: "sad",
+                        4: "angry",
+                        5: "fearful",
+                        6: "disgust",
+                        7: "surprised"}
+
+        self.classes = sorted(list(classes_dict.keys()))
+        self.classes_dict = classes_dict
+
+        paths = list(itertools.chain.from_iterable(map(lambda actor_path: list(map(lambda fname: os.path.join(root_dir, actor_path, fname), sorted(os.listdir(os.path.join(root_dir, actor_path))))), sorted(os.listdir(root_dir)))))
+        labels = list(itertools.chain.from_iterable(map(lambda actor_path: list(map(lambda fname: int(fname.split("-")[2])-1, sorted(os.listdir(os.path.join(root_dir, actor_path))))), sorted(os.listdir(root_dir)))))
+        
+        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
+
+
