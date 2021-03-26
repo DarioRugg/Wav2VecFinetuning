@@ -3,7 +3,8 @@
     "num_epoches": 24,
 
     "model": "wav2vec",
-    "model_arch": "complete_finetuning",
+    "model_arch": "complete",
+    "finetuning_flag": true,
     
     "dataset": "RAVDESS",
     "audio_size": 72562, 

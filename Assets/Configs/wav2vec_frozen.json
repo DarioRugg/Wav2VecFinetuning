@@ -4,6 +4,7 @@
 
     "model": "wav2vec",
     "model_arch": "complete",
+    "finetuning_flag": false,
     
     "dataset": "DEMoS",
     "audio_size": 72562, 

@@ -35,6 +35,7 @@ def train(conf_file):
     # model:
     model_name = conf["model"]
     model_architecture = conf["model_arch"] if "model_arch" in conf.keys() else None
+    wav2vec_finetuning = conf["finetuning_flag"] if "finetuning_flag" in conf.keys() else True
 
     # dataset:
     dataset_name = conf["dataset"]
@@ -61,7 +62,7 @@ def train(conf_file):
     # ------------------> Model <-----------------------
     number_of_classes = len(dataset.get_classes())
     
-    model = _get_model(model_name=model_name, num_classes=number_of_classes, model_arch=model_architecture)
+    model = _get_model(model_name=model_name, num_classes=number_of_classes, model_arch=model_architecture, wav2vec_finetuning_flag=wav2vec_finetuning)
 
     model = model.to(device)
     
@@ -149,6 +150,7 @@ def test(conf_file):
     # model:
     model_name = conf["model"]
     model_architecture = conf["model_arch"] if "model_arch" in conf.keys() else None
+    wav2vec_finetuning = conf["finetuning_flag"] if "finetuning_flag" in conf.keys() else True
 
     # dataset:
     dataset_name = conf["dataset"]
@@ -180,7 +182,7 @@ def test(conf_file):
 
     number_of_classes = len(dataset.get_classes())
 
-    model = _get_model(model_name=model_name, num_classes=number_of_classes, model_arch=model_architecture)
+    model = _get_model(model_name=model_name, num_classes=number_of_classes, model_arch=model_architecture, wav2vec_finetuning_flag=wav2vec_finetuning)
 
     # we just wnat to test the model
     model.eval()
@@ -218,20 +220,16 @@ def test(conf_file):
 
 
 # ------------------> Other functions <-----------------------
-def _get_model(model_name, num_classes, model_arch=None):
+def _get_model(model_name, num_classes, model_arch=None, wav2vec_finetuning_flag=False):
     if model_name.lower() == "cnn":
         return SpectrogramCNN(input_size=(1, 128, 391), class_number=num_classes)
     elif model_name.lower() == "effnet":
         return EfficientNet.from_pretrained(model_name=model_arch, in_channels=1, num_classes=num_classes)
     elif model_name.lower() == "wav2vec":
         if model_arch == "complete":
-            return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=False)
-        elif model_arch == "complete_finetuning":
-            return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=True)
-        elif model_arch == "just_cnn":
-            return Wav2VecFeatureExtractor(num_classes=num_classes, finetune_pretrained=False)
-        elif model_arch == "just_cnn_finetuning":
-            return Wav2VecFeatureExtractor(num_classes=num_classes, finetune_pretrained=True)
+            return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=wav2vec_finetuning_flag)
+        elif model_arch == "cnn_only":
+            return Wav2VecFeatureExtractor(num_classes=num_classes, finetune_pretrained=wav2vec_finetuning_flag)
         elif model_arch == "finetuning_convs_frozen_encoder":
             return Wav2VecFeezingEncoderOnly(num_classes=num_classes)
 

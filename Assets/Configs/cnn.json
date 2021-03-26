@@ -1,5 +1,5 @@
 {
-    "simulation_name": "home_test",
+    "simulation_name": "cnn_basic",
     "num_epoches": 8,
 
     "model": "cnn",
