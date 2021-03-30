@@ -50,7 +50,9 @@ def train(conf_file):
     training_batches = conf["training_batches"]
     testing_batches = conf["testing_batches"]
     if "server_config" in conf.keys(): _server_setup(conf["server_config"])
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    print(f" - Configuration: \n    simulation name: {simulation_name} \n    GPU: {device.index} \n    model name: {model_name} \n    dataset: {dataset_name} \n    epoches: {num_epoches} \n    train and test batches: [{training_batches}, {testing_batches}] \n")
 
 
     # ------------------> Dataset <-----------------------

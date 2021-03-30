@@ -2,6 +2,7 @@
 **/.idea/
 **/.vscode/
 **/__pycache__/
+**/wandb/
 
 # ignoring Data and Models directories in Assets since them are really heavy
 /Assets/*
@@ -13,6 +14,8 @@
 
 # Let's ignore the notebook for testing
 /*_home.*
+/scripts/*_home.*
 
 /Assets/Configs/*_home.json
 /Assets/Configs/*_test.json
+/scripts/train_test_home.py
