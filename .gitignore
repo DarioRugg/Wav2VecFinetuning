@@ -3,6 +3,7 @@
 **/.vscode/
 **/__pycache__/
 **/wandb/
+/outputs/
 
 # ignoring Data and Models directories in Assets since them are really heavy
 /Assets/*
