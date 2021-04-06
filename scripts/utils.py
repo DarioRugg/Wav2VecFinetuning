@@ -18,9 +18,9 @@ def get_dataset(cfg, split=True, part="both"):
     # ------------------> Dataset <-----------------------
     orig_cwd = hydra.utils.get_original_cwd()
     if cfg.dataset.name.lower() in ["demos", "demos_test"]:
-        dataset = DEMoSDataset(root_dir=join(orig_cwd, cfg.data.data, cfg.dataset.dir), padding_cropping_size=cfg.padding_cropping, specrtrogram=cfg.specrtrogram, sampling_rate=cfg.sampling_rate)
+        dataset = DEMoSDataset(root_dir=join(orig_cwd, cfg.path.data, cfg.dataset.dir), padding_cropping_size=cfg.dataset.padding_cropping, spectrogram=cfg.dataset.spectrogram, sampling_rate=cfg.dataset.sampling_rate)
     elif cfg.dataset.name.lower() == "ravdess":
-        dataset = RAVDESSDataset(root_dir=join(orig_cwd, cfg.data.data, cfg.dataset.dir), padding_cropping_size=cfg.padding_cropping, specrtrogram=cfg.specrtrogram, sampling_rate=cfg.sampling_rate)
+        dataset = RAVDESSDataset(root_dir=join(orig_cwd, cfg.path.data, cfg.dataset.dir), padding_cropping_size=cfg.dataset.padding_cropping, spectrogram=cfg.dataset.spectrogram, sampling_rate=cfg.dataset.sampling_rate)
 
     if not split: return dataset
 
@@ -41,18 +41,18 @@ def split_dataset(dataset, split_size, seed):
 
 def get_model(cfg):
     if cfg.model.name.lower() == "cnn":
-        return SpectrogramCNN(input_size=(1, 128, 391), class_number=cfg.dataset.num_classes)
-    elif cfg.model.name.lower() == "effnet":
-        return EfficientNet.from_pretrained(model_name=f"efficientnet-b{cfg.model.blocks}", in_channels=1, num_classes=cfg.dataset.num_classes)
+        return SpectrogramCNN(input_size=(1, 128, 391), class_number=cfg.dataset.number_of_classes)
+    elif cfg.model.name.lower() == "efficientnet":
+        return EfficientNet.from_pretrained(model_name=f"efficientnet-b{cfg.model.blocks}", in_channels=1, num_classes=cfg.dataset.number_of_classes)
     elif cfg.model.name.lower() == "wav2vec":
         if cfg.model.option == "all" & cfg.model.finetuning == "partial":
-            return Wav2VecFeezingEncoderOnly(num_classes=cfg.dataset.num_classes)
+            return Wav2VecFeezingEncoderOnly(num_classes=cfg.dataset.number_of_classes)
         elif cfg.model.option == "all":
-            return Wav2VecFeatureExtractor(num_classes=cfg.dataset.num_classes, finetune_pretrained=cfg.model.finetuning)
+            return Wav2VecFeatureExtractor(num_classes=cfg.dataset.number_of_classes, finetune_pretrained=cfg.model.finetuning)
         elif cfg.model.option == "cnn":
-            return Wav2VecComplete(num_classes=cfg.dataset.num_classes, finetune_pretrained=cfg.model.finetuning)
+            return Wav2VecComplete(num_classes=cfg.dataset.number_of_classes, finetune_pretrained=cfg.model.finetuning)
 
 def server_setup(cfg):
     if cfg.machine.gpu is not False:
         os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"  
-        os.environ["CUDA_VISIBLE_DEVICES"]=cfg.machine.gpu
+        os.environ["CUDA_VISIBLE_DEVICES"]=str(cfg.machine.gpu)

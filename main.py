@@ -15,8 +15,8 @@ def main(cfg: DictConfig):
     logs_writer = SummaryWriter("TensorBoard_logs")
     wandb.init(project=cfg.simulation_name, dir=hydra.utils.get_original_cwd())
 
-    train(conf=cfg, tensorboard_writer=logs_writer)
-    test(conf=cfg, tensorboard_writer=logs_writer)
+    train(cfg=cfg, tensorboard_writer=logs_writer)
+    test(cfg=cfg, tensorboard_writer=logs_writer)
 
     logs_writer.close()
 

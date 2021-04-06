@@ -76,7 +76,7 @@ the dataloader below is for loading the DEMoS dataset.
 """
 class DEMoSDataset(BaseDataset):
 
-    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, specrtrogram=False, sampling_rate=None, transform=None):
+    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, spectrogram=False, sampling_rate=None, transform=None):
         """
         Args:
             root_dir (string): Directory with all the DEMoS audio files.
@@ -86,7 +86,7 @@ class DEMoSDataset(BaseDataset):
             transform (callable, optional): Optional transform to be applied on a sample.
         """
 
-        super().__init__(padding_cropping_size, specrtrogram, sampling_rate, transform)
+        super().__init__(padding_cropping_size, spectrogram, sampling_rate, transform)
 
         demos_dir = os.path.join(root_dir, "DEMOS")
         neu_dir = os.path.join(root_dir, "NEU")
@@ -115,7 +115,7 @@ the dataloader below is for loading the RAVDESS dataset.
 """
 class RAVDESSDataset(BaseDataset):
 
-    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, specrtrogram=False, sampling_rate=None, transform=None):
+    def __init__(self, root_dir, classes_dict=None, padding_cropping_size=None, spectrogram=False, sampling_rate=None, transform=None):
         """
         Args:
             root_dir (string): Directory with all the DEMoS audio files.
@@ -125,7 +125,7 @@ class RAVDESSDataset(BaseDataset):
             transform (callable, optional): Optional transform to be applied on a sample.
         """
 
-        super().__init__(padding_cropping_size, specrtrogram, sampling_rate, transform)
+        super().__init__(padding_cropping_size, spectrogram, sampling_rate, transform)
 
         # originally the labels idex were starting from 1 but the the loss finction are used to lables from 0
         if classes_dict is None:

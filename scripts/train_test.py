@@ -2,11 +2,11 @@
 
 import torch
 
-from scripts.utils import server_setup, get_model, get_dataset, split_dataset
+from scripts.utils import get_model, get_dataset, split_dataset
 
 from time import time
 from os.path import join
-from torch.utils.tensorboard import SummaryWriter
+
 import wandb
 
 def train(cfg, tensorboard_writer):
@@ -18,6 +18,8 @@ def train(cfg, tensorboard_writer):
     
     # ------------------> Model <-----------------------
     model = get_model(cfg)
+
+    print(model, type(model))
 
     wandb.watch(model)
 
@@ -33,8 +35,8 @@ def train(cfg, tensorboard_writer):
         epoch_beginning = time()
 
         train_split, val_split = split_dataset(train_dataset, split_size=0.8, seed=None)
-        train_loader = torch.utils.data.DataLoader(train_split, batch_size=cfg.machine.training_batches, num_workers=cfg.machine.num_workers)
-        val_loader = torch.utils.data.DataLoader(val_split, batch_size=cfg.machine.testing_batches, num_workers=cfg.machine.num_workers)
+        train_loader = torch.utils.data.DataLoader(train_split, batch_size=cfg.machine.training_batches, num_workers=cfg.machine.workers)
+        val_loader = torch.utils.data.DataLoader(val_split, batch_size=cfg.machine.testing_batches, num_workers=cfg.machine.workers)
 
         # in train model for training
         model.train()
@@ -55,8 +57,8 @@ def train(cfg, tensorboard_writer):
                
             if i % (len(train_loader)//10) == 0:
                 print(f"        Batch {i}, {round(i/len(train_loader)*100)}%; Loss: {loss}")
-                if epoch == 0:
-                    total_time = (time() - epoch_beginning)/labels.size(0)*len(train_dataset)*cfg.model.num_epoches
+                if epoch == 0 and i == 0:
+                    total_time = (time() - epoch_beginning)/labels.size(0)*len(train_dataset)*cfg.model.epoches
                     print(f"          - In total it should take around {round(total_time/60)} minutes")
             train_loss += loss.item()/len(train_loader)
 
