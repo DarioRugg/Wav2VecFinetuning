@@ -2,69 +2,24 @@
 
 import torch
 
-from scripts.librosa_dataloaders import DEMoSDataset, RAVDESSDataset
+from scripts.utils import server_setup, get_model, get_dataset, split_dataset
 
 from time import time
 from os.path import join
-import os
 from torch.utils.tensorboard import SummaryWriter
-import json
+import wandb
 
-from scripts.classification_models import SpectrogramCNN
-from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractor, Wav2VecFeezingEncoderOnly
-from efficientnet_pytorch import EfficientNet
+def train(cfg, tensorboard_writer):
 
-
-"""The paths we are going to use in the notebook"""
-data_path = join(".", "Assets", "Data")
-model_path = join(".", "Assets", "Models")
-logs_path = join(".", "Assets", "Logs")
-conf_path = join(".", "Assets", "Configs")
-
-
-def train(cfg):    
-    
-    """
-    # general:
-    simulation_name = conf["simulation_name"]
-    num_epoches = conf["num_epoches"]
-
-    # model:
-    model_name = conf["model"]
-    model_architecture = conf["model_arch"] if "model_arch" in conf.keys() else None
-    wav2vec_finetuning = conf["finetuning_flag"] if "finetuning_flag" in conf.keys() else True
-
-    # dataset:
-    dataset_name = conf["dataset"]
-    audio_size = conf["audio_size"]
-    spectrogram_flag = conf["use_spectrogram"]
-    sampling_rate = conf["sampling_rate"] if "sampling_rate" in conf.keys() else None
-    train_split_size = conf["train_test_split_size"]
-    split_seed = conf["train_test_split_seed"]
-
-    # hardware:
-    num_workers = conf["num_workers"]
-    training_batches = conf["training_batches"]
-    testing_batches = conf["testing_batches"]
-    if "server_config" in conf.keys(): _server_setup(conf["server_config"])
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    print(f" - Configuration: \n    simulation name: {simulation_name} \n    GPU: {device.index} \n    model name: {model_name} \n    dataset: {dataset_name} \n    epoches: {num_epoches} \n    train and test batches: [{training_batches}, {testing_batches}] \n")
-    """
-    _server_setup(cfg)
-    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # ------------------> Dataset <-----------------------
-    dataset = _get_dataset(cfg)
-
-    train_dataset = _get_dataset_split(cfg, data=dataset, part="train")
-
+    train_dataset = get_dataset(cfg, part="train")
     
     # ------------------> Model <-----------------------
-    number_of_classes = len(dataset.get_classes())
-    
-    model = _get_model(cfg, num_classes=number_of_classes)
+    model = get_model(cfg)
+
+    wandb.watch(model)
 
     model = model.to(device)
     
@@ -72,14 +27,12 @@ def train(cfg):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters())
 
-    logs_writer = SummaryWriter("TensorBoard_logs")
-
     best_model = None
     for epoch in range(cfg.model.epoches):
         print(f" -> Starting epoch {epoch} <- ")
         epoch_beginning = time()
 
-        train_split, val_split = _get_dataset_split(data=train_dataset, part="both", split_size=0.8, seed=None)
+        train_split, val_split = split_dataset(train_dataset, split_size=0.8, seed=None)
         train_loader = torch.utils.data.DataLoader(train_split, batch_size=cfg.machine.training_batches, num_workers=cfg.machine.num_workers)
         val_loader = torch.utils.data.DataLoader(val_split, batch_size=cfg.machine.testing_batches, num_workers=cfg.machine.num_workers)
 
@@ -122,83 +75,52 @@ def train(cfg):
                 correct += (predicted == labels).sum().item()
                 val_loss += criterion(outputs, labels)/len(val_loader)
 
-        logs_writer.add_scalars('Loss', {'Train':train_loss,'Validation':val_loss}, epoch)
-        logs_writer.add_scalars('Accuracy', {'Validation':correct/total}, epoch)
+        tensorboard_writer.add_scalars('Loss', {'Train':train_loss,'Validation':val_loss}, epoch)
+        tensorboard_writer.add_scalars('Accuracy', {'Validation':correct/total}, epoch)
+        wandb.log({"Val_Loss": val_loss, "Train_Loss": train_loss})
+        wandb.log({"Val_Accuracy": correct/total})
+
         print(f"    Epoch {epoch} summary: \n    Loss: {val_loss}   Accuracy: {correct/total} - epoch time: {int((time() - epoch_beginning)//60)}:{int((time() - epoch_beginning)%60)}")
         
 
         if best_model is None or val_loss < best_model["Loss"]:
             best_model = {"State_Dict": model.state_dict(), "Epoch": epoch, "Loss": val_loss.item(), "Accuracy": correct/total}
+            wandb.run.summary["best_loss_train"] = val_loss.item()
+            wandb.run.summary["best_accuracy_train"] = correct/total
+            wandb.run.summary["best_at_epoch_train"] = epoch
 
 
     # ----> saving models at the end of the trainging <------
     print(f"Saving models, best model found at epoch {best_model['Epoch']} with Loss {round(best_model['Loss'], 4)} and Accuracy {round(best_model['Accuracy'], 4)} on val")
 
-    torch.save(best_model["State_Dict"], os.path.join("models", f"best_model_epoch{best_model['Epoch']}.pt")) # best model
-    torch.save(model.state_dict(), os.path.join("models", f"last_model_epoch{epoch}.pt")) # last epoch model
+    torch.save(best_model["State_Dict"], join("models", f"best_model.pt")) # best model
+    torch.save(model.state_dict(), join("models", f"last_model_epoch{epoch}.pt")) # last epoch model
 
 
 
 
-def test(conf_file):
-    
-    # ------------------> Loading configuration <-----------------------
-    with open(join(conf_path, conf_file)) as f:
-        conf = json.load(f)
+def test(cfg, tensorboard_writer):
 
-    # general:
-    simulation_name = conf["simulation_name"]
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # model:
-    model_name = conf["model"]
-    model_architecture = conf["model_arch"] if "model_arch" in conf.keys() else None
-    wav2vec_finetuning = conf["finetuning_flag"] if "finetuning_flag" in conf.keys() else True
-
-    # dataset:
-    dataset_name = conf["dataset"]
-    audio_size = conf["audio_size"]
-    spectrogram_flag = conf["use_spectrogram"]
-    sampling_rate = conf["sampling_rate"] if "sampling_rate" in conf.keys() else None
-    split_seed = conf["train_test_split_seed"]
-    train_split_size = conf["train_test_split_size"]
-
-    # hardware:
-    num_workers = conf["num_workers"]
-    training_batches = conf["training_batches"]
-    testing_batches = conf["testing_batches"]
-    num_epoches = conf["num_epoches"]
-    if "server_config" in conf.keys(): _server_setup(conf["server_config"])
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    
     # ------------------> Dataset <-----------------------
+    test_dataset = get_dataset(cfg, part="test")
 
-    dataset = _get_dataset(dataset=dataset_name, pad_crop_size=audio_size, specrtrogram=spectrogram_flag, sampling_rate=sampling_rate)
-
-    test_dataset = _get_dataset_split(data=dataset, part="test", split_size=train_split_size, seed=split_seed)
-
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=testing_batches, num_workers=num_workers)
-
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.machine.testing_batches, num_workers=cfg.machine.num_workers)
     
     # ------------------> Model <-----------------------
 
-    number_of_classes = len(dataset.get_classes())
-
-    model = _get_model(model_name=model_name, num_classes=number_of_classes, model_arch=model_architecture, wav2vec_finetuning_flag=wav2vec_finetuning)
+    model = get_model(cfg=cfg)
 
     # we just wnat to test the model
     model.eval()
 
     model = model.to(device)
 
-    model.load_state_dict(torch.load(os.path.join(model_path, f"{simulation_name}_best_model.pt")))
-
-    logs_writer = SummaryWriter(os.path.join(logs_path, f"{simulation_name}_logs"))
+    model.load_state_dict(torch.load(join("models", f"best_model.pt")))
 
     
     # ------------------> Testing <-----------------------
-
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=testing_batches, num_workers=num_workers)
     correct = 0
     total = 0
     loss = 0
@@ -213,46 +135,9 @@ def test(conf_file):
             loss += torch.nn.CrossEntropyLoss()(outputs, labels)/len(test_loader)
 
 
-    logs_writer.add_scalars('Accuracy', {'Test':correct/total}, num_epoches)
+    tensorboard_writer.add_scalars('Accuracy', {'Test':correct/total}, cfg.model.epoches)
+    wandb.run.summary["best_loss_test"] = loss.item()
+    wandb.run.summary["best_accuracy_test"] = correct/total
+
     print(f" ---> On Test data: \n    Loss: {loss}   Accuracy: {correct/total}")
     print(f"      done in: {round(time()-test_start_time, 2)} seconds")
-
-    logs_writer.close()
-
-
-
-# ------------------> Other functions <-----------------------
-def _get_model(model_name, num_classes, model_arch=None, wav2vec_finetuning_flag=False):
-    if model_name.lower() == "cnn":
-        return SpectrogramCNN(input_size=(1, 128, 391), class_number=num_classes)
-    elif model_name.lower() == "effnet":
-        return EfficientNet.from_pretrained(model_name=model_arch, in_channels=1, num_classes=num_classes)
-    elif model_name.lower() == "wav2vec":
-        if model_arch == "complete":
-            return Wav2VecComplete(num_classes=num_classes, finetune_pretrained=wav2vec_finetuning_flag)
-        elif model_arch == "cnn_only":
-            return Wav2VecFeatureExtractor(num_classes=num_classes, finetune_pretrained=wav2vec_finetuning_flag)
-        elif model_arch == "finetuning_convs_frozen_encoder":
-            return Wav2VecFeezingEncoderOnly(num_classes=num_classes)
-
-def _get_dataset(dataset, pad_crop_size, specrtrogram=False, sampling_rate=None):
-    if dataset.lower() == "demos":
-        return DEMoSDataset(root_dir=os.path.join(data_path, "DEMoS_dataset"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
-    elif dataset.lower() == "ravdess":
-        return RAVDESSDataset(root_dir=os.path.join(data_path, "RAVDESS_dataset"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
-    elif dataset.lower() == "demos_short_test":
-        return DEMoSDataset(root_dir=os.path.join(data_path, "DEMoS_dataset_short_test"), padding_cropping_size=pad_crop_size, specrtrogram=specrtrogram, sampling_rate=sampling_rate)
-
-def _get_dataset_split(data, part, split_size, seed):
-    train_dataset, test_dataset = torch.utils.data.random_split(dataset=data, lengths=[round(len(data)*split_size), len(data)-round(len(data)*split_size)], 
-                                                                generator=torch.Generator().manual_seed(seed) if seed is not None else None)
-    
-    if part is None or part == "both": return train_dataset, test_dataset
-    elif part == "test": return test_dataset
-    elif part == "train": return train_dataset
-
-def _server_setup(cfg):
-    if cfg.machine.gpu is not False:
-        os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"  
-        os.environ["CUDA_VISIBLE_DEVICES"]=cfg.machine.gpu
-

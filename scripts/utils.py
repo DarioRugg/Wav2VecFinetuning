@@ -13,7 +13,7 @@ from efficientnet_pytorch import EfficientNet
 
 
 
-def get_splitted_dataset(cfg, part="both"):
+def get_dataset(cfg, split=True, part="both"):
 
     # ------------------> Dataset <-----------------------
     orig_cwd = hydra.utils.get_original_cwd()
@@ -22,13 +22,21 @@ def get_splitted_dataset(cfg, part="both"):
     elif cfg.dataset.name.lower() == "ravdess":
         dataset = RAVDESSDataset(root_dir=join(orig_cwd, cfg.data.data, cfg.dataset.dir), padding_cropping_size=cfg.padding_cropping, specrtrogram=cfg.specrtrogram, sampling_rate=cfg.sampling_rate)
 
+    if not split: return dataset
+
     # ------------------> Split <-----------------------
-    train_dataset, test_dataset = torch.utils.data.random_split(dataset=dataset, lengths=[round(len(dataset)*cfg.dataset.split_size), len(dataset)-round(len(dataset)*cfg.dataset.split_size)], 
-                                                                generator=torch.Generator().manual_seed(cfg.dataset.split_seed))
+    train_dataset, test_dataset = split_dataset(dataset, cfg.dataset.split_size, cfg.dataset.split_seed)
     
     if part is None or part == "both": return train_dataset, test_dataset
     elif part == "test": return test_dataset
     elif part == "train": return train_dataset
+
+def split_dataset(dataset, split_size, seed):
+    # ------------------> Split <-----------------------
+    train_dataset, test_dataset = torch.utils.data.random_split(dataset=dataset, lengths=[round(len(dataset)*split_size), len(dataset)-round(len(dataset)*split_size)], 
+                                                                generator=torch.Generator().manual_seed(seed) if seed is not None else None)
+    
+    return train_dataset, test_dataset
 
 
 def get_model(cfg):

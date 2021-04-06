@@ -1,12 +1,24 @@
 import hydra
 from omegaconf import DictConfig
 from scripts.train_test import train, test
+from scripts.utils import server_setup
+
+from torch.utils.tensorboard import SummaryWriter
+import wandb
 
 
 @hydra.main(config_path=r"Assets\Configs_hydra", config_name="config.yaml")
 def main(cfg: DictConfig):
-    train(conf=cfg)
-    test(conf=cfg)
+
+    server_setup(cfg)
+
+    logs_writer = SummaryWriter("TensorBoard_logs")
+    wandb.init(project=cfg.simulation_name, dir=hydra.utils.get_original_cwd())
+
+    train(conf=cfg, tensorboard_writer=logs_writer)
+    test(conf=cfg, tensorboard_writer=logs_writer)
+
+    logs_writer.close()
 
 if __name__ == '__main__':
     main()
