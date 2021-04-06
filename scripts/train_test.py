@@ -22,12 +22,9 @@ logs_path = join(".", "Assets", "Logs")
 conf_path = join(".", "Assets", "Configs")
 
 
-def train(conf_file):    
-
-    # ------------------> Loading the proper config <-----------------------
-    with open(join(conf_path, conf_file)) as f:
-        conf = json.load(f)
-
+def train(cfg):    
+    
+    """
     # general:
     simulation_name = conf["simulation_name"]
     num_epoches = conf["num_epoches"]
@@ -53,18 +50,21 @@ def train(conf_file):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     print(f" - Configuration: \n    simulation name: {simulation_name} \n    GPU: {device.index} \n    model name: {model_name} \n    dataset: {dataset_name} \n    epoches: {num_epoches} \n    train and test batches: [{training_batches}, {testing_batches}] \n")
-
+    """
+    _server_setup(cfg)
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # ------------------> Dataset <-----------------------
-    dataset = _get_dataset(dataset=dataset_name, pad_crop_size=audio_size, specrtrogram=spectrogram_flag, sampling_rate=sampling_rate)
+    dataset = _get_dataset(cfg)
 
-    train_dataset = _get_dataset_split(data=dataset, part="train", split_size=train_split_size, seed=split_seed)
+    train_dataset = _get_dataset_split(cfg, data=dataset, part="train")
 
     
     # ------------------> Model <-----------------------
     number_of_classes = len(dataset.get_classes())
     
-    model = _get_model(model_name=model_name, num_classes=number_of_classes, model_arch=model_architecture, wav2vec_finetuning_flag=wav2vec_finetuning)
+    model = _get_model(cfg, num_classes=number_of_classes)
 
     model = model.to(device)
     
@@ -72,16 +72,16 @@ def train(conf_file):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters())
 
-    logs_writer = SummaryWriter(os.path.join(logs_path, f"{simulation_name}_logs"))
+    logs_writer = SummaryWriter("TensorBoard_logs")
 
     best_model = None
-    for epoch in range(num_epoches):
+    for epoch in range(cfg.model.epoches):
         print(f" -> Starting epoch {epoch} <- ")
         epoch_beginning = time()
 
         train_split, val_split = _get_dataset_split(data=train_dataset, part="both", split_size=0.8, seed=None)
-        train_loader = torch.utils.data.DataLoader(train_split, batch_size=training_batches, num_workers=num_workers)
-        val_loader = torch.utils.data.DataLoader(val_split, batch_size=testing_batches, num_workers=num_workers)
+        train_loader = torch.utils.data.DataLoader(train_split, batch_size=cfg.machine.training_batches, num_workers=cfg.machine.num_workers)
+        val_loader = torch.utils.data.DataLoader(val_split, batch_size=cfg.machine.testing_batches, num_workers=cfg.machine.num_workers)
 
         # in train model for training
         model.train()
@@ -103,7 +103,7 @@ def train(conf_file):
             if i % (len(train_loader)//10) == 0:
                 print(f"        Batch {i}, {round(i/len(train_loader)*100)}%; Loss: {loss}")
                 if epoch == 0:
-                    total_time = (time() - epoch_beginning)/labels.size(0)*len(train_dataset)*num_epoches
+                    total_time = (time() - epoch_beginning)/labels.size(0)*len(train_dataset)*cfg.model.num_epoches
                     print(f"          - In total it should take around {round(total_time/60)} minutes")
             train_loss += loss.item()/len(train_loader)
 
@@ -134,8 +134,8 @@ def train(conf_file):
     # ----> saving models at the end of the trainging <------
     print(f"Saving models, best model found at epoch {best_model['Epoch']} with Loss {round(best_model['Loss'], 4)} and Accuracy {round(best_model['Accuracy'], 4)} on val")
 
-    torch.save(best_model["State_Dict"], os.path.join(model_path, f"{simulation_name}_best_model.pt")) # best model
-    torch.save(model.state_dict(), os.path.join(model_path, f"{simulation_name}_last_model_{num_epoches}epochs.pt")) # last epoch model
+    torch.save(best_model["State_Dict"], os.path.join("models", f"best_model_epoch{best_model['Epoch']}.pt")) # best model
+    torch.save(model.state_dict(), os.path.join("models", f"last_model_epoch{epoch}.pt")) # last epoch model
 
 
 
@@ -251,10 +251,8 @@ def _get_dataset_split(data, part, split_size, seed):
     elif part == "test": return test_dataset
     elif part == "train": return train_dataset
 
-def _server_setup(server_config_file):
-    with open(join(conf_path, server_config_file)) as f:
-        conf = json.load(f)
-
-    os.environ["CUDA_DEVICE_ORDER"]=conf["CUDA_DEVICE_ORDER"]  
-    os.environ["CUDA_VISIBLE_DEVICES"]=conf["CUDA_VISIBLE_DEVICES"]
+def _server_setup(cfg):
+    if cfg.machine.gpu is not False:
+        os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"  
+        os.environ["CUDA_VISIBLE_DEVICES"]=cfg.machine.gpu
 

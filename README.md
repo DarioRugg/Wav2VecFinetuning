@@ -26,3 +26,11 @@ The structure of the folder is the following:
 The folders Data and Models are not in the repository since them are too heavy.
 
 for the home test the directory "home_test" inside Logs/ is excluded from git
+
+
+## running finetuning using Hydra from terminal
+example of command:
+python hydra_test_home.py machine=server model=efficientnet dataset=demos --cfg job
+
+Where `model` must be specified and `machine=server` and `dataset=demos` have those configs as default.
+The option `--cfg job` is instead for print the config at the beginning of the run.
