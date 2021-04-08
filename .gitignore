@@ -7,8 +7,7 @@
 
 # ignoring Data and Models directories in Assets since them are really heavy
 /Assets/*
-!/Assets/Logs/
-!/Assets/Configs/
+!/Assets/Config/
 
 # Let's ignore the home tests
 /Assets/Logs/home_test_logs/
@@ -19,4 +18,3 @@
 
 /Assets/Configs/*_home.json
 /Assets/Configs/*_test.json
-/scripts/train_test_home.py

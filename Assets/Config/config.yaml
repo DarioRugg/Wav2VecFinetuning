@@ -1,0 +1,13 @@
+simulation_name: first sim
+
+defaults:
+  - path: directories
+  - machine: server
+  - model: ???
+  - dataset: demos_test
+  - custom_configs: for_${defaults.2.model} 
+    optional: true
+  - custom_configs: for_${defaults.3.dataset}
+    optional: true
+  - custom_configs: for_${defaults.3.dataset}_&_${defaults.2.model}
+    optional: true

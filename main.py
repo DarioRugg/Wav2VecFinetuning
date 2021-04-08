@@ -7,7 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 import wandb
 
 
-@hydra.main(config_path=r"Assets\Configs_hydra", config_name="config.yaml")
+@hydra.main(config_path=r"Assets\Config", config_name="config.yaml")
 def main(cfg: DictConfig):
 
     server_setup(cfg)

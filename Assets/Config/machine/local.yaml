@@ -1,0 +1,5 @@
+# @package _group_
+workers: 8
+training_batches: 4
+testing_batches: 4
+gpu: false

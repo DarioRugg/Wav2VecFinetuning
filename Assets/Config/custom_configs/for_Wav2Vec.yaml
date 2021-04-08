@@ -1,0 +1,4 @@
+# @package _global_
+dataset:
+  padding_cropping: 72562
+  sampling_rate: 16000
