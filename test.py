@@ -1,5 +1,6 @@
-from scripts.librosa_dataloaders import DEMoSDataset
+from scripts.wav2vec_models import Wav2VecComplete
 
-dataset = dataset = DEMoSDataset(root_dir="Assets\Data\DEMoS_dataset_short_test", padding_cropping_size=10000, spectrogram=True, sampling_rate=None)
+model = Wav2VecComplete(8)
 
-print(dataset[0][0].shape)
+for child in model.pretrained_model.encoder.modules():
+    print("  ---->    ", child)

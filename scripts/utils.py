@@ -45,12 +45,12 @@ def get_model(cfg):
     elif cfg.model.name.lower() == "efficientnet":
         return EfficientNet.from_pretrained(model_name=f"efficientnet-b{cfg.model.blocks}", in_channels=1, num_classes=cfg.dataset.number_of_classes)
     elif cfg.model.name.lower() == "wav2vec":
-        if cfg.model.option == "all" & cfg.model.finetuning == "partial":
+        if cfg.model.option == "partial":
             return Wav2VecFeezingEncoderOnly(num_classes=cfg.dataset.number_of_classes)
         elif cfg.model.option == "all":
-            return Wav2VecFeatureExtractor(num_classes=cfg.dataset.number_of_classes, finetune_pretrained=cfg.model.finetuning)
-        elif cfg.model.option == "cnn":
             return Wav2VecComplete(num_classes=cfg.dataset.number_of_classes, finetune_pretrained=cfg.model.finetuning)
+        elif cfg.model.option == "cnn":
+            return Wav2VecFeatureExtractor(num_classes=cfg.dataset.number_of_classes, finetune_pretrained=cfg.model.finetuning)
 
 def get_model_from_checkpoint(cfg, checkpoint_path):
     if cfg.model.name.lower() == "cnn":

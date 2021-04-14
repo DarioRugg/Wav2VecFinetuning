@@ -56,13 +56,15 @@ def main(cfg: DictConfig):
         )
 
     # ------------------> Training <-----------------------
-    trainer.fit(model, train_loader, val_loader)
+    if cfg.train:
+        trainer.fit(model, train_loader, val_loader)
 
-    # ------------------> Loading best model <-----------------------
-    model = get_model_from_checkpoint(cfg, checkpoint_path=checkpoint_callback.best_model_path)
+    if cfg.test:
+        # ------------------> Loading best model <-----------------------
+        model = get_model_from_checkpoint(cfg, checkpoint_path=checkpoint_callback.best_model_path)
 
-    # ------------------> Testing <-----------------------
-    trainer.test(model, test_loader)
+        # ------------------> Testing <-----------------------
+        trainer.test(model, test_loader)
 
 if __name__ == '__main__':
     main()

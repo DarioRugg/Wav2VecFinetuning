@@ -1,10 +1,12 @@
 simulation_name: first sim
+train: true
+test: false
 
 defaults:
   - path: directories
-  - machine: local
-  - model: ???
-  - dataset: demos_test
+  - machine: server
+  - model: wav2vec
+  - dataset: demos
   - custom_configs: for_${defaults.2.model} 
     optional: true
   - custom_configs: for_${defaults.3.dataset}

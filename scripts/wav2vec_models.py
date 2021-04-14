@@ -1,11 +1,13 @@
 import torch
+from torch.nn.functional import cross_entropy
+import pytorch_lightning as pl
 from transformers import Wav2Vec2Model
 
 """
 the model below is the classificator made just with the final layers of the wav2vec model.
 """
 
-class Wav2VecComplete(torch.nn.Module):
+class Wav2VecComplete(pl.LightningModule):
     def __init__(self, num_classes, pretrained_out_dim=1024, finetune_pretrained=False):
 
         super(Wav2VecComplete, self).__init__()
@@ -13,6 +15,10 @@ class Wav2VecComplete(torch.nn.Module):
 
         # First we take the pretrained xlsr model        
         self.pretrained_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-large-xlsr-53")
+
+        # setting require grad = true only if we want to fine tune the pretrained model
+        for name, param in self.pretrained_model.named_parameters():
+            param.requires_grad = self.finetune_pretrained
 
         # then we add on top the classification layers to be trained
         self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
@@ -26,7 +32,31 @@ class Wav2VecComplete(torch.nn.Module):
             
         y_pred = self.softmax_activation(self.linear_layer(embedding))
         return y_pred
-    
+
+    def training_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('val_loss', loss)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('test_loss', loss)
+        return loss
+
     def train(self):
         # we train the pretrained architecture only if specified
         if self.finetune_pretrained: self.pretrained_model.train()
@@ -38,8 +68,12 @@ class Wav2VecComplete(torch.nn.Module):
         self.pretrained_model.eval()
         self.linear_layer.eval()
 
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        return optimizer
 
-class Wav2VecFeatureExtractor(torch.nn.Module):
+
+class Wav2VecFeatureExtractor(pl.LightningModule):
     def __init__(self, num_classes, pretrained_out_dim=512, finetune_pretrained=False):
 
         super(Wav2VecFeatureExtractor, self).__init__()
@@ -49,6 +83,10 @@ class Wav2VecFeatureExtractor(torch.nn.Module):
         complete_pretrained_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-large-xlsr-53")
         
         self.pretrained_model = complete_pretrained_model.feature_extractor
+
+        # setting require grad = true only if we want to fine tune the pretrained model
+        for name, param in self.pretrained_model.named_parameters():
+            param.requires_grad = self.finetune_pretrained
 
         # then we add on top the classification layers to be trained
         self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
@@ -62,7 +100,31 @@ class Wav2VecFeatureExtractor(torch.nn.Module):
             
         y_pred = self.softmax_activation(self.linear_layer(embedding))
         return y_pred
-    
+
+    def training_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('val_loss', loss)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('test_loss', loss)
+        return loss
+
     def train(self):
         # we train the pretrained architecture only if specified
         if self.finetune_pretrained: self.pretrained_model.train()
@@ -74,15 +136,27 @@ class Wav2VecFeatureExtractor(torch.nn.Module):
         self.pretrained_model.eval()
         self.linear_layer.eval()
 
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        return optimizer
 
 
-class Wav2VecFeezingEncoderOnly(torch.nn.Module):
+
+class Wav2VecFeezingEncoderOnly(pl.LightningModule):
     def __init__(self, num_classes, pretrained_out_dim=1024):
 
         super(Wav2VecFeezingEncoderOnly, self).__init__()
 
         # First we take the pretrained xlsr model        
         self.pretrained_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-large-xlsr-53")
+
+        # require grad for all the model:
+        for name, param in self.pretrained_model.named_parameters():
+            param.requires_grad = True
+        # then freezing the encoder only, except for the normalization layers that we want to fine-tune:
+        for name, param in self.pretrained_model.encoder.named_parameters():
+            if "layer_norm" not in name:
+                param.requires_grad = False
 
         # then we add on top the classification layers to be trained
         self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
@@ -94,6 +168,30 @@ class Wav2VecFeezingEncoderOnly(torch.nn.Module):
             
         y_pred = self.softmax_activation(self.linear_layer(embedding))
         return y_pred
+
+    def training_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('val_loss', loss)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        # training_step defined the train loop. It is independent of forward
+        x, y = batch
+        y_hat = self(x)
+        loss = cross_entropy(y_hat, y)
+        self.log('test_loss', loss)
+        return loss
 
     def train(self):
         # we don't want to train the encoder as well
@@ -107,3 +205,7 @@ class Wav2VecFeezingEncoderOnly(torch.nn.Module):
     def eval(self):
         self.pretrained_model.eval()
         self.linear_layer.eval()
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        return optimizer
