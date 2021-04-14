@@ -1,0 +1,6 @@
+# @package _global_
+model:
+  input_size: [1, 128, 160]
+
+dataset:
+  padding_cropping: 80000

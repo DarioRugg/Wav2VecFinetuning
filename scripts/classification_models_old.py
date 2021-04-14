@@ -1,9 +1,7 @@
 import torch
 import numpy as np
-import torch.nn.functional as F
-import pytorch_lightning as pl
 
-class SpectrogramCNN(pl.LightningModule):
+class SpectrogramCNN(torch.nn.Module):
     def __init__(self, input_size, class_number):
 
         super(SpectrogramCNN, self).__init__()
@@ -48,37 +46,11 @@ class SpectrogramCNN(pl.LightningModule):
 
 
     def forward(self, x):
+
         y = torch.nn.Sequential(
                 self.cnn_layers,
                 torch.nn.Flatten(),
                 self.linear_layers
             )(x)
+        
         return y
-
-    def training_step(self, batch, batch_idx):
-        # training_step defined the train loop. It is independent of forward
-        x, y = batch
-        y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        self.log('train_loss', loss)
-        return loss
-    
-    def validation_step(self, batch, batch_idx):
-        # training_step defined the train loop. It is independent of forward
-        x, y = batch
-        y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        self.log('val_loss', loss)
-        return loss
-
-    def test_step(self, batch, batch_idx):
-        # training_step defined the train loop. It is independent of forward
-        x, y = batch
-        y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        self.log('test_loss', loss)
-        return loss
-    
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
-        return optimizer

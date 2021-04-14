@@ -2,7 +2,7 @@ simulation_name: first sim
 
 defaults:
   - path: directories
-  - machine: server
+  - machine: local
   - model: ???
   - dataset: demos_test
   - custom_configs: for_${defaults.2.model} 

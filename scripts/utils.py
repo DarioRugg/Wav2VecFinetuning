@@ -41,7 +41,7 @@ def split_dataset(dataset, split_size, seed):
 
 def get_model(cfg):
     if cfg.model.name.lower() == "cnn":
-        return SpectrogramCNN(input_size=(1, 128, 391), class_number=cfg.dataset.number_of_classes)
+        return SpectrogramCNN(input_size=cfg.model.input_size, class_number=cfg.dataset.number_of_classes)
     elif cfg.model.name.lower() == "efficientnet":
         return EfficientNet.from_pretrained(model_name=f"efficientnet-b{cfg.model.blocks}", in_channels=1, num_classes=cfg.dataset.number_of_classes)
     elif cfg.model.name.lower() == "wav2vec":
@@ -51,6 +51,12 @@ def get_model(cfg):
             return Wav2VecFeatureExtractor(num_classes=cfg.dataset.number_of_classes, finetune_pretrained=cfg.model.finetuning)
         elif cfg.model.option == "cnn":
             return Wav2VecComplete(num_classes=cfg.dataset.number_of_classes, finetune_pretrained=cfg.model.finetuning)
+
+def get_model_from_checkpoint(cfg, checkpoint_path):
+    if cfg.model.name.lower() == "cnn":
+        return SpectrogramCNN.load_from_checkpoint(checkpoint_path, input_size=cfg.model.input_size, class_number=cfg.dataset.number_of_classes)
+    else:
+        raise(cfg.model.name, "not integrated with pytorch lightening yet!")
 
 def server_setup(cfg):
     if cfg.machine.gpu is not False:
