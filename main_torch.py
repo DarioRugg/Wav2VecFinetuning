@@ -9,7 +9,16 @@ import wandb
 
 @hydra.main(config_path=r"Assets\Config", config_name="config.yaml")
 def main(cfg: DictConfig):
-    print(cfg.model.input_size, type(cfg.model.input_size))
+
+    server_setup(cfg)
+
+    logs_writer = SummaryWriter("TensorBoard_logs")
+    wandb.init(project=cfg.simulation_name, dir=hydra.utils.get_original_cwd())
+
+    train(cfg=cfg, tensorboard_writer=logs_writer)
+    # test(cfg=cfg, tensorboard_writer=logs_writer)
+
+    logs_writer.close()
 
 if __name__ == '__main__':
     main()

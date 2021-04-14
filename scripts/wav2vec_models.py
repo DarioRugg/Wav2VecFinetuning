@@ -13,7 +13,7 @@ class Wav2VecComplete(pl.LightningModule):
         super(Wav2VecComplete, self).__init__()
         self.finetune_pretrained = finetune_pretrained
 
-        # First we take the pretrained xlsr model        
+        # First we take the pretrained xlsr model
         self.pretrained_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-large-xlsr-53")
 
         # setting require grad = true only if we want to fine tune the pretrained model
