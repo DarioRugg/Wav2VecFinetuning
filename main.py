@@ -21,6 +21,10 @@ from pytorch_lightning import Trainer
 
 @hydra.main(config_path=join(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
+
+    # adjusting path:
+    cfg.path.data = join("Assets", "Data")
+
     server_setup(cfg)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

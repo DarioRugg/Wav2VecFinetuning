@@ -5,8 +5,8 @@ test: false
 defaults:
   - path: directories
   - machine: server
-  - model: wav2vec
-  - dataset: demos
+  - model: Wav2Vec
+  - dataset: DEMoS
   - custom_configs: for_${defaults.2.model} 
     optional: true
   - custom_configs: for_${defaults.3.dataset}
