@@ -5,6 +5,7 @@ from scripts.utils import server_setup
 from scripts.classification_models import SpectrogramCNN
 
 import torch
+from torch.utils.data import DataLoader
 
 from scripts.utils import get_model, get_dataset, split_dataset, get_model_from_checkpoint
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -18,7 +19,7 @@ from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning import Trainer
 
 
-@hydra.main(config_path=r"Assets\Config", config_name="config.yaml")
+@hydra.main(config_path=join(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
     server_setup(cfg)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -29,13 +30,13 @@ def main(cfg: DictConfig):
     train_dataset, test_dataset = get_dataset(cfg)
 
     train_split, val_split = split_dataset(train_dataset, split_size=0.8, seed=None)
-    train_loader = torch.utils.data.DataLoader(train_split, batch_size=cfg.machine.training_batches,
-                                               num_workers=cfg.machine.workers)
-    val_loader = torch.utils.data.DataLoader(val_split, batch_size=cfg.machine.testing_batches,
-                                             num_workers=cfg.machine.workers)
+    train_loader = DataLoader(train_split, batch_size=cfg.machine.training_batches,
+                              num_workers=cfg.machine.workers)
+    val_loader = DataLoader(val_split, batch_size=cfg.machine.testing_batches,
+                            num_workers=cfg.machine.workers)
 
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=cfg.machine.testing_batches,
-                                              num_workers=cfg.machine.workers)
+    test_loader = DataLoader(test_dataset, batch_size=cfg.machine.testing_batches,
+                             num_workers=cfg.machine.workers)
 
     # ------------------> Model <-----------------------
     model = get_model(cfg)
