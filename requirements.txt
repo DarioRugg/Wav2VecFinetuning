@@ -1,8 +1,11 @@
-torch
+torch~=1.7.1
 efficientnet_pytorch
-transformers
-librosa
-pandas
-numpy
+transformers~=4.4.2
+librosa~=0.8.0
+pandas~=1.2.0
+numpy~=1.19.5
 tensorboard
 pytorch-lightning
+hydra
+wandb~=0.10.23
+scipy~=1.6.1

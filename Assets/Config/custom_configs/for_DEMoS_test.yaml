@@ -1,3 +1,5 @@
 # @package _global_
+simulation_name: test
+
 model:
-  epoches: 2
+  epochs: 2

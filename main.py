@@ -1,51 +1,41 @@
+from os.path import join
+
 import hydra
 from omegaconf import DictConfig
 
-from scripts.utils import server_setup
-from scripts.classification_models import SpectrogramCNN
+from scripts.utils import server_setup, get_paths
 
-import torch
 from torch.utils.data import DataLoader
 
 from scripts.utils import get_model, get_dataset, split_dataset, get_model_from_checkpoint
 from pytorch_lightning.callbacks import ModelCheckpoint
-
-from time import time
-from os.path import join
+from pytorch_lightning import Trainer
 
 from pytorch_lightning.loggers import WandbLogger
-
-# Pytorch-Lightning
-from pytorch_lightning import Trainer
 
 
 @hydra.main(config_path=join(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
-
-    # adjusting path:
-    cfg.path.data = join("Assets", "Data")
-
     server_setup(cfg)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    wandb_logger = WandbLogger(project=cfg.simulation_name, save_dir=join(hydra.utils.get_original_cwd(), "wandb_logs"))
+    path = get_paths(hydra.utils.get_original_cwd())
+
+    wandb_logger = WandbLogger(project=cfg.simulation_name)
 
     # ------------------> Dataset <-----------------------
-    train_dataset, test_dataset = get_dataset(cfg)
+    train_dataset, test_dataset = get_dataset(cfg, path["data"])
 
-    train_split, val_split = split_dataset(train_dataset, split_size=0.8, seed=None)
+    train_split, val_split = split_dataset(train_dataset, split_size=0.8, seed=2021)
+
     train_loader = DataLoader(train_split, batch_size=cfg.machine.training_batches,
                               num_workers=cfg.machine.workers)
     val_loader = DataLoader(val_split, batch_size=cfg.machine.testing_batches,
                             num_workers=cfg.machine.workers)
-
     test_loader = DataLoader(test_dataset, batch_size=cfg.machine.testing_batches,
                              num_workers=cfg.machine.workers)
 
     # ------------------> Model <-----------------------
     model = get_model(cfg)
-
-    model = model.to(device)
 
     checkpoint_callback = ModelCheckpoint(
         monitor='val_loss',
@@ -57,7 +47,7 @@ def main(cfg: DictConfig):
     )
     trainer = Trainer(
         logger=wandb_logger,  # W&B integration
-        max_epochs=cfg.model.epoches,  # number of epochs
+        max_epochs=cfg.model.epochs,  # number of epochs
         callbacks=[checkpoint_callback]
     )
 

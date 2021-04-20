@@ -11,17 +11,18 @@ from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractor, Wav
 from efficientnet_pytorch import EfficientNet
 
 
-def get_dataset(cfg, split=True, part="both"):
+def get_dataset(cfg, data_path, split=True, part="both"):
     # ------------------> Dataset <-----------------------
-    orig_cwd = hydra.utils.get_original_cwd()
     if cfg.dataset.name.lower() in ["demos", "demos_test"]:
-        dataset = DEMoSDataset(root_dir=join(orig_cwd, cfg.path.data, cfg.dataset.dir),
+        dataset = DEMoSDataset(root_dir=join(data_path, cfg.dataset.dir),
                                padding_cropping_size=cfg.dataset.padding_cropping, spectrogram=cfg.dataset.spectrogram,
                                sampling_rate=cfg.dataset.sampling_rate)
     elif cfg.dataset.name.lower() == "ravdess":
-        dataset = RAVDESSDataset(root_dir=join(orig_cwd, cfg.path.data, cfg.dataset.dir),
+        dataset = RAVDESSDataset(root_dir=join(data_path, cfg.dataset.dir),
                                  padding_cropping_size=cfg.dataset.padding_cropping,
                                  spectrogram=cfg.dataset.spectrogram, sampling_rate=cfg.dataset.sampling_rate)
+    else:
+        raise Exception("Requested dataset, doesn't exist yet")
 
     if not split: return dataset
 
@@ -87,3 +88,9 @@ def server_setup(cfg):
     if cfg.machine.gpu is not False:
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = str(cfg.machine.gpu)
+
+def get_paths(root):
+    return {
+        "data": join(root, "Assets", "Data"),
+        "logs": join(root, "Assets", "Logs")
+    }

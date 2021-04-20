@@ -1,6 +1,6 @@
 # @package _group_
 name: Wav2Vec
-epoches: 24
+epochs: 24
 
 option: partial # {all, cnn, partial}
 finetuning: yes # {yes, no}

@@ -1,5 +1,5 @@
 # @package _group_
 name: EfficientNet
-epoches: 24
+epochs: 24
 
 blocks: 7
