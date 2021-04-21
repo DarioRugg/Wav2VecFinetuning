@@ -2,10 +2,8 @@ import torch
 from torch.nn.functional import cross_entropy
 import pytorch_lightning as pl
 from transformers import Wav2Vec2Model
+from scripts.wav2vec_cls_model import Wav2VecModelOverridden
 
-"""
-the model below is the classificator made just with the final layers of the wav2vec model.
-"""
 
 class Wav2VecBase(pl.LightningModule):
     def __init__(self, num_classes, pretrained_out_dim=1024):
@@ -52,10 +50,14 @@ class Wav2VecBase(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
-class Wav2VecCLSToken(Wav2VecBase):
-    def __init__(self, num_classes, pretrained_out_dim=1024, finetune_encoder=False):
 
+class Wav2VecCLSToken(Wav2VecBase):
+
+    def __init__(self, num_classes, pretrained_out_dim=1024):
         super(Wav2VecCLSToken, self).__init__(num_classes, pretrained_out_dim)
+
+        # We replace the pretrained model with the one with the CLS token
+        self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
 
         # require grad for all the model:
         for name, param in self.pretrained_model.named_parameters():
@@ -63,20 +65,13 @@ class Wav2VecCLSToken(Wav2VecBase):
         # then freezing the encoder only, except for the normalization layers that we want to fine-tune:
         for name, param in self.pretrained_model.encoder.named_parameters():
             if "layer_norm" not in name:
-                param.requires_grad = finetune_encoder
+                param.requires_grad = False
 
     def forward(self, x):
-        """
-        Here we have to insert the CLS token right before the encoder,
-        but we need tu understand how to pass the results of the CNN to the encoder.
-        """
 
-        with torch.enable_grad() if self.finetune_pretrained else torch.no_grad():
-            # the audio is divided in chunks depending of it's length,
-            # so we do the mean of all the chunks embeddings to get the final embedding
-            embedding = self.pretrained_model(x).last_hidden_state.mean(dim=1)
+        cls_token, _ = self.pretrained_model(x)
 
-        y_pred = self.softmax_activation(self.linear_layer(embedding))
+        y_pred = self.softmax_activation(self.linear_layer(cls_token))
         return y_pred
 
 

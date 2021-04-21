@@ -7,7 +7,7 @@ from os.path import join
 import os
 
 from scripts.classification_models import SpectrogramCNN
-from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractor, Wav2VecFeezingEncoderOnly
+from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractor, Wav2VecFeezingEncoderOnly, Wav2VecCLSToken
 from efficientnet_pytorch import EfficientNet
 
 
@@ -63,6 +63,8 @@ def get_model(cfg):
         elif cfg.model.option == "cnn":
             return Wav2VecFeatureExtractor(num_classes=cfg.dataset.number_of_classes,
                                            finetune_pretrained=cfg.model.finetuning)
+        elif cfg.model.option == "cls_token":
+            return Wav2VecCLSToken(num_classes=cfg.dataset.number_of_classes)
 
 
 def get_model_from_checkpoint(cfg, checkpoint_path):
@@ -80,6 +82,8 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
             return Wav2VecFeatureExtractor.load_from_checkpoint(checkpoint_path,
                                                                 num_classes=cfg.dataset.number_of_classes,
                                                                 finetune_pretrained=cfg.model.finetuning)
+        elif cfg.model.option == "cls_token":
+            return Wav2VecCLSToken.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes)
     else:
         raise (cfg.model.name, "not integrated with pytorch lightening yet!")
 

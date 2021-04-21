@@ -2,5 +2,5 @@
 name: Wav2Vec
 epochs: 24
 
-option: partial # {all, cnn, partial}
+option: cls_token # {all, cnn, partial, cls_token}
 finetuning: yes # {yes, no}
