@@ -36,4 +36,4 @@ Where `model` must be specified and `machine=server` and `dataset=demos` have th
 The option `--cfg job` is instead for print the config at the beginning of the run.
 
 ## Reference to look at:
-(colab notebook)[https://colab.research.google.com/github/patrickvonplaten/notebooks/blob/master/Fine_Tune_XLSR_Wav2Vec2_on_Turkish_ASR_with_%F0%9F%A4%97_Transformers.ipynb#scrollTo=K_JUmf3G3b9S]
+[colab notebook](https://colab.research.google.com/github/patrickvonplaten/notebooks/blob/master/Fine_Tune_XLSR_Wav2Vec2_on_Turkish_ASR_with_%F0%9F%A4%97_Transformers.ipynb#scrollTo=K_JUmf3G3b9S )
