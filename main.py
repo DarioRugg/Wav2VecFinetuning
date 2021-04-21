@@ -3,7 +3,7 @@ from os.path import join
 import hydra
 from omegaconf import DictConfig
 
-from scripts.utils import server_setup, get_paths
+from scripts.utils import get_paths
 
 from torch.utils.data import DataLoader
 
@@ -16,7 +16,6 @@ from pytorch_lightning.loggers import WandbLogger
 
 @hydra.main(config_path=join(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
-    server_setup(cfg)
 
     path = get_paths(hydra.utils.get_original_cwd())
 
@@ -48,7 +47,8 @@ def main(cfg: DictConfig):
     trainer = Trainer(
         logger=wandb_logger,  # W&B integration
         max_epochs=cfg.model.epochs,  # number of epochs
-        callbacks=[checkpoint_callback]
+        callbacks=[checkpoint_callback],
+        gpus=[cfg.machine.gpu] if cfg.machine.gpu is not False else None
     )
 
     # ------------------> Training <-----------------------

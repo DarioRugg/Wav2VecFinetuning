@@ -84,13 +84,14 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
         raise (cfg.model.name, "not integrated with pytorch lightening yet!")
 
 
-def server_setup(cfg):
-    if cfg.machine.gpu is not False:
-        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-        os.environ["CUDA_VISIBLE_DEVICES"] = str(cfg.machine.gpu)
-
 def get_paths(root):
     return {
         "data": join(root, "Assets", "Data"),
         "logs": join(root, "Assets", "Logs")
     }
+
+# useless now, for lightning at least
+def server_setup(cfg):
+    if cfg.machine.gpu is not False:
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(cfg.machine.gpu)
