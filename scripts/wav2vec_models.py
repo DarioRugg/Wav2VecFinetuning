@@ -2,7 +2,7 @@ import torch
 from torch.nn.functional import cross_entropy
 import pytorch_lightning as pl
 from transformers import Wav2Vec2Model
-from scripts.wav2vec_cls_model import Wav2VecModelOverridden
+from scripts.models.wav2vec2_modified import Wav2VecModelOverridden
 
 
 class Wav2VecBase(pl.LightningModule):
