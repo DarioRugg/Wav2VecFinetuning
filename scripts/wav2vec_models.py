@@ -59,13 +59,18 @@ class Wav2VecCLSToken(Wav2VecBase):
         # We replace the pretrained model with the one with the CLS token
         self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
 
+        # we don't want to get the masks
+        self.pretrained_model.config.mask_time_prob = 0
+
         # require grad for all the model:
         for name, param in self.pretrained_model.named_parameters():
             param.requires_grad = True
+        """
         # then freezing the encoder only, except for the normalization layers that we want to fine-tune:
         for name, param in self.pretrained_model.encoder.named_parameters():
             if "layer_norm" not in name:
                 param.requires_grad = False
+        """
 
     def forward(self, x):
 
