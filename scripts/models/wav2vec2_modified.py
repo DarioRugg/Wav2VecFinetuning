@@ -188,7 +188,7 @@ class Wav2VecModelOverridden(Wav2Vec2Model):
                 hidden_states[mask_feature_indices[:, None].expand(-1, sequence_length, -1)] = 0
 
         cls_token = torch.stack(
-            [torch.unsqueeze(torch.arange(0, 1 + 1 / 1023, step=1 / 1023, device=hidden_states.device), dim=0)] * hidden_states.size()[0], dim=0)
+            [torch.unsqueeze(torch.linspace(0, 1, steps=hidden_states.size()[2], device=hidden_states.device), dim=0)] * hidden_states.size()[0], dim=0)
         hidden_states_with_token = torch.cat([cls_token, hidden_states], dim=1)
         encoder_outputs = self.encoder(
             hidden_states_with_token,

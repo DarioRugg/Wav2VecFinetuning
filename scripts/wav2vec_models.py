@@ -1,17 +1,18 @@
 import torch
 from torch.nn.functional import cross_entropy
 import pytorch_lightning as pl
-from transformers import Wav2Vec2Model
+from transformers import Wav2Vec2Model, Wav2Vec2Config
 from scripts.models.wav2vec2_modified import Wav2VecModelOverridden
 
 
 class Wav2VecBase(pl.LightningModule):
-    def __init__(self, num_classes, pretrained_out_dim=1024):
+    def __init__(self, num_classes):
 
         super(Wav2VecBase, self).__init__()
 
         # First we take the pretrained xlsr model
         self.pretrained_model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-large-xlsr-53")
+        pretrained_out_dim = self.pretrained_model.config.hidden_size
 
         # then we add on top the classification layers to be trained
         self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
@@ -53,14 +54,50 @@ class Wav2VecBase(pl.LightningModule):
 
 class Wav2VecCLSToken(Wav2VecBase):
 
-    def __init__(self, num_classes, pretrained_out_dim=1024):
-        super(Wav2VecCLSToken, self).__init__(num_classes, pretrained_out_dim)
+    def __init__(self, num_classes):
+        super(Wav2VecCLSToken, self).__init__(num_classes)
 
         # We replace the pretrained model with the one with the CLS token
         self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
 
         # we don't want to get the masks
         self.pretrained_model.config.mask_time_prob = 0
+
+        # require grad for all the model:
+        for name, param in self.pretrained_model.named_parameters():
+            param.requires_grad = True
+        """
+        # then freezing the encoder only, except for the normalization layers that we want to fine-tune:
+        for name, param in self.pretrained_model.encoder.named_parameters():
+            if "layer_norm" not in name:
+                param.requires_grad = False
+        """
+
+    def forward(self, x):
+
+        cls_token, _ = self.pretrained_model(x)
+
+        y_pred = self.softmax_activation(self.linear_layer(cls_token))
+        return y_pred
+
+
+class Wav2VecCLSTokenNotPretrained(Wav2VecBase):
+
+    def __init__(self, num_classes):
+        super(Wav2VecCLSTokenNotPretrained, self).__init__(num_classes)
+
+        # getting the config for constructing the model randomly initialized
+        model_config = Wav2Vec2Config("facebook/wav2vec2-large-xlsr-53")
+
+        # we don't want to get the masks
+        model_config.mask_time_prob = 0
+
+        # We replace the pretrained model with a non pretrained architecture with CLS token
+        self.pretrained_model = Wav2VecModelOverridden(model_config)
+        pretrained_out_dim = self.pretrained_model.config.hidden_size
+
+        # the output dim is changed is changed
+        self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
 
         # require grad for all the model:
         for name, param in self.pretrained_model.named_parameters():
