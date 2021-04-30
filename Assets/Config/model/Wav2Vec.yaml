@@ -1,6 +1,6 @@
 # @package _group_
 name: Wav2Vec
-epochs: 24
+epochs: 16
 
-option: cls_token_not_pretrained # {all, cnn, partial, cls_token, cls_token_not_pretrained}
+option: cnn # {all, cnn, cnn_avg, partial, cls_token, cls_token_not_pretrained}
 finetuning: yes # {yes, no}

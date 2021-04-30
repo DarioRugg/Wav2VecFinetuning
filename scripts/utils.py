@@ -7,7 +7,8 @@ from os.path import join
 import os
 
 from scripts.classification_models import SpectrogramCNN
-from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractor, Wav2VecFeezingEncoderOnly, Wav2VecCLSToken, Wav2VecCLSTokenNotPretrained
+from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractorGAP, Wav2VecFeezingEncoderOnly, \
+    Wav2VecCLSToken, Wav2VecCLSTokenNotPretrained, Wav2VecFeatureExtractor
 from efficientnet_pytorch import EfficientNet
 
 
@@ -63,6 +64,9 @@ def get_model(cfg):
         elif cfg.model.option == "cnn":
             return Wav2VecFeatureExtractor(num_classes=cfg.dataset.number_of_classes,
                                            finetune_pretrained=cfg.model.finetuning)
+        elif cfg.model.option == "cnn_avg":
+            return Wav2VecFeatureExtractorGAP(num_classes=cfg.dataset.number_of_classes,
+                                              finetune_pretrained=cfg.model.finetuning)
         elif cfg.model.option == "cls_token":
             return Wav2VecCLSToken(num_classes=cfg.dataset.number_of_classes)
         elif cfg.model.option == "cls_token_not_pretrained":
@@ -82,12 +86,17 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
                                                         finetune_pretrained=cfg.model.finetuning)
         elif cfg.model.option == "cnn":
             return Wav2VecFeatureExtractor.load_from_checkpoint(checkpoint_path,
-                                                                num_classes=cfg.dataset.number_of_classes,
-                                                                finetune_pretrained=cfg.model.finetuning)
+                                                                   num_classes=cfg.dataset.number_of_classes,
+                                                                   finetune_pretrained=cfg.model.finetuning)
+        elif cfg.model.option == "cnn_avg":
+            return Wav2VecFeatureExtractorGAP.load_from_checkpoint(checkpoint_path,
+                                                                   num_classes=cfg.dataset.number_of_classes,
+                                                                   finetune_pretrained=cfg.model.finetuning)
         elif cfg.model.option == "cls_token":
             return Wav2VecCLSToken.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes)
         elif cfg.model.option == "cls_token_not_pretrained":
-            return Wav2VecCLSTokenNotPretrained.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes)
+            return Wav2VecCLSTokenNotPretrained.load_from_checkpoint(checkpoint_path,
+                                                                     num_classes=cfg.dataset.number_of_classes)
     else:
         raise (cfg.model.name, "not integrated with pytorch lightening yet!")
 
@@ -97,6 +106,7 @@ def get_paths(root):
         "data": join(root, "Assets", "Data"),
         "logs": join(root, "Assets", "Logs")
     }
+
 
 # useless now, for lightning at least
 def server_setup(cfg):
