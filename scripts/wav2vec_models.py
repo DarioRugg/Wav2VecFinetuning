@@ -69,7 +69,7 @@ class Wav2VecFeatureExtractor(Wav2VecBase):
         # then we add on top the classification layers to be trained
         self.linear_projector = nn.Sequential(
             nn.Linear(torch.prod(torch.tensor(pretrained_out_dim)), num_classes),
-            nn.Softmax(dim=0)
+            nn.Softmax(dim=1)
         )
 
     def forward(self, x):
@@ -114,7 +114,7 @@ class Wav2VecFeatureExtractorGAP(Wav2VecBase):
         # we need to add the first channel to the "image"
         features = torch.unsqueeze(features, dim=1)
         # we feed this image in the cls_net that gives the classification tensor
-        y_pred = torch.reshape(self.cls_net(features), shape=(features.shape[0], features.shape[1]))
+        y_pred = torch.reshape(self.cls_net(features), shape=(features.shape[0], 8))
         return y_pred
 
 
