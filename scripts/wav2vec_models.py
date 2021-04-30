@@ -112,9 +112,9 @@ class Wav2VecFeatureExtractorGAP(Wav2VecBase):
             features = self.pretrained_model(x)
 
         # we need to add the first channel to the "image"
-        features = torch.unsqueeze(features, dim=1)
+        features = self.cls_net(torch.unsqueeze(features, dim=1))
         # we feed this image in the cls_net that gives the classification tensor
-        y_pred = torch.reshape(self.cls_net(features), shape=(features.shape[0], 8))
+        y_pred = torch.reshape(features, shape=(features.shape[0], features.shape[1]))
         return y_pred
 
 
