@@ -1,7 +1,6 @@
 import torch
-import hydra
 
-from scripts.librosa_dataloaders import DEMoSDataset, RAVDESSDataset
+from scripts.datasets.librosa_dataloaders import DEMoSDataset, RAVDESSDataset
 
 from os.path import join
 import os
@@ -12,6 +11,7 @@ from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractorGAP, 
 from efficientnet_pytorch import EfficientNet
 
 
+# useless now, for lightning at least
 def get_dataset(cfg, data_path, split=True, part="both"):
     # ------------------> Dataset <-----------------------
     if cfg.dataset.name.lower() in ["demos", "demos_test"]:
@@ -38,6 +38,7 @@ def get_dataset(cfg, data_path, split=True, part="both"):
         return train_dataset
 
 
+# useless now, for lightning at least
 def split_dataset(dataset, split_size, seed):
     # ------------------> Split <-----------------------
     train_dataset, test_dataset = torch.utils.data.random_split(dataset=dataset,
@@ -99,13 +100,6 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
                                                                      num_classes=cfg.dataset.number_of_classes)
     else:
         raise (cfg.model.name, "not integrated with pytorch lightening yet!")
-
-
-def get_paths(root):
-    return {
-        "data": join(root, "Assets", "Data"),
-        "logs": join(root, "Assets", "Logs")
-    }
 
 
 # useless now, for lightning at least

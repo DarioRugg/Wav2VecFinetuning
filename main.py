@@ -1,37 +1,24 @@
-from os.path import join
+from pathlib import Path
 
 import hydra
 from omegaconf import DictConfig
 
-from scripts.utils import get_paths
+from scripts.lightning_dataloaders import DataModule
 
-from torch.utils.data import DataLoader
-
-from scripts.utils import get_model, get_dataset, split_dataset, get_model_from_checkpoint
+from scripts.utils import get_model, get_model_from_checkpoint
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import Trainer
 
 from pytorch_lightning.loggers import WandbLogger
 
 
-@hydra.main(config_path=join(".", "Assets", "Config"), config_name="config.yaml")
+@hydra.main(config_path=Path(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
-
-    path = get_paths(hydra.utils.get_original_cwd())
 
     wandb_logger = WandbLogger(project=cfg.simulation_name)
 
     # ------------------> Dataset <-----------------------
-    train_dataset, test_dataset = get_dataset(cfg, path["data"])
-
-    train_split, val_split = split_dataset(train_dataset, split_size=0.8, seed=2021)
-
-    train_loader = DataLoader(train_split, batch_size=cfg.machine.training_batches,
-                              num_workers=cfg.machine.workers)
-    val_loader = DataLoader(val_split, batch_size=cfg.machine.testing_batches,
-                            num_workers=cfg.machine.workers)
-    test_loader = DataLoader(test_dataset, batch_size=cfg.machine.testing_batches,
-                             num_workers=cfg.machine.workers)
+    data_module = DataModule(config=cfg)
 
     # ------------------> Model <-----------------------
     model = get_model(cfg)
@@ -53,14 +40,14 @@ def main(cfg: DictConfig):
 
     # ------------------> Training <-----------------------
     if cfg.train:
-        trainer.fit(model, train_loader, val_loader)
+        trainer.fit(model=model, datamodule=data_module)
 
     if cfg.test:
         # ------------------> Loading best model <-----------------------
         model = get_model_from_checkpoint(cfg, checkpoint_path=checkpoint_callback.best_model_path)
 
         # ------------------> Testing <-----------------------
-        trainer.test(model, test_loader)
+        trainer.test(model=model, datamodule=data_module)
 
 
 if __name__ == '__main__':

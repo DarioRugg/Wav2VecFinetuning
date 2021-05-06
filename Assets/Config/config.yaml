@@ -12,3 +12,5 @@ defaults:
     optional: true
   - custom_configs: for_${defaults.2.dataset}_&_${defaults.1.model}
     optional: true
+
+  - path: paths
