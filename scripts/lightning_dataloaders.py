@@ -35,7 +35,8 @@ class DataModule(pl.LightningDataModule):
         self.train, self.val, self.test = random_split(dataset=dataset,
                                                        lengths=[round(len(dataset) * .8),  # train
                                                                 round(len(dataset) * .1),  # val
-                                                                len(dataset) - round(len(dataset) * .9)],  # test
+                                                                len(dataset) - round(len(dataset) * .8)
+                                                                - round(len(dataset) * .1)],  # test
                                                        generator=torch.Generator().manual_seed(
                                                            self.cfg.dataset.split_seed))
 
