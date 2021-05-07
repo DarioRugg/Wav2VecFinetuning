@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from scripts.lightning_dataloaders import DataModule
 
@@ -10,10 +10,17 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import Trainer
 
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning import seed_everything
 
+import logging
+logger = logging.getLogger("__name__")
 
 @hydra.main(config_path=Path(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
+
+    logger.info(OmegaConf.to_yaml(cfg))
+
+    seed_everything(0)
 
     wandb_logger = WandbLogger(project=cfg.simulation_name)
 

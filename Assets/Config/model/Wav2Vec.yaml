@@ -2,5 +2,5 @@
 name: Wav2Vec
 epochs: 16
 
-option: cnn # {all, cnn, cnn_avg, partial, cls_token, cls_token_not_pretrained}
+option: cls_token # {all, cnn, cnn_avg, partial, cls_token, cls_token_not_pretrained}
 finetuning: yes # {yes, no}

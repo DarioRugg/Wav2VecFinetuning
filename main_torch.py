@@ -1,6 +1,6 @@
 import hydra
 from omegaconf import DictConfig
-from scripts.train_test_lightning import train, test
+from scripts.train_test import train, test
 from scripts.utils import server_setup
 
 from torch.utils.tensorboard import SummaryWriter
