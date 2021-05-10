@@ -41,7 +41,7 @@ class Wav2VecBase(pl.LightningModule):
         self.log('test_loss', loss, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
         acc = accuracy(y_hat, y)
-        self.log('val_acc', acc, on_epoch=True)
+        self.log('test_acc', acc, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
