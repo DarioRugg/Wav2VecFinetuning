@@ -42,7 +42,8 @@ def main(cfg: DictConfig):
         logger=wandb_logger,  # W&B integration
         max_epochs=cfg.model.epochs,  # number of epochs
         callbacks=[checkpoint_callback],
-        gpus=[cfg.machine.gpu] if cfg.machine.gpu is not False else None
+        # gpus=[cfg.machine.gpu] if cfg.machine.gpu is not False else None
+        gpus=[0]
     )
 
     # ------------------> Training <-----------------------
