@@ -4,7 +4,7 @@ hydra:
   run:
     dir: outputs/2021-05-07/17-50-10
 
-model_to_test: None
+model_to_test: models/sample-mnist-epoch=36-val_loss=0.22.ckpt
 
 defaults:
   - machine: server
