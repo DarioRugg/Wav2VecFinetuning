@@ -9,6 +9,7 @@ from scripts.utils import get_model, get_model_from_checkpoint
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import Trainer
 
+import wandb
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning import seed_everything
 
@@ -22,6 +23,7 @@ def main(cfg: DictConfig):
 
     seed_everything(0)
 
+    wandb.init(project="emoaudio")
     wandb_logger = WandbLogger(project=cfg.simulation_name)
 
     # ------------------> Dataset <-----------------------
