@@ -113,6 +113,29 @@ class Wav2VecFeatureExtractorGAP(Wav2VecBase):
         return y_pred
 
 
+class Wav2VecCLSPaperFinetuning(Wav2VecBase):
+
+    def __init__(self, num_classes):
+        super(Wav2VecCLSPaperFinetuning, self).__init__(num_classes)
+
+        # We replace the pretrained model with the one with the CLS token
+        self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
+
+        # freezing the model at first
+        # (then we will train also the transformer, feature extractor will remain frozen)
+        for name, param in self.pretrained_model.named_parameters():
+            param.requires_grad = False
+
+        # then we add on top the classification layer to be trained
+        self.linear_layer = torch.nn.Linear(self.pretrained_model.config.hidden_size, num_classes)
+
+    def forward(self, x):
+        cls_token, _ = self.pretrained_model(x)
+
+        y_pred = self.linear_layer(cls_token)
+        return y_pred
+
+
 class Wav2VecCLSToken(Wav2VecBase):
 
     def __init__(self, num_classes):
