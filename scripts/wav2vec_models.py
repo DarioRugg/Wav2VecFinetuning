@@ -49,6 +49,47 @@ class Wav2VecBase(pl.LightningModule):
         return optimizer
 
 
+class Wav2VecCLSPaperFinetuning(Wav2VecBase):
+
+    def __init__(self, num_classes):
+        super(Wav2VecCLSPaperFinetuning, self).__init__(num_classes)
+
+        # We replace the pretrained model with the one with the CLS token
+        self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
+
+        # freezing the model at first
+        # (then we will train also the transformer, feature extractor will remain frozen)
+        for name, param in self.pretrained_model.named_parameters():
+            param.requires_grad = False
+
+        # then we add on top the classification layer to be trained
+        self.linear_layer = torch.nn.Linear(self.pretrained_model.config.hidden_size, num_classes)
+
+    def forward(self, x):
+        cls_token, _ = self.pretrained_model(x)
+
+        y_pred = self.linear_layer(cls_token)
+        return y_pred
+
+    # here we must define the optimizer and the different learning rate
+    def configure_optimizers(self):
+        pass
+
+    # here we must perform different schedulers at different time
+    def optimizer_step(
+            self,
+            epoch: int = None,
+            batch_idx: int = None,
+            optimizer: Optimizer = None,
+            optimizer_idx: int = None,
+            optimizer_closure: Optional[Callable] = None,
+            on_tpu: bool = None,
+            using_native_amp: bool = None,
+            using_lbfgs: bool = None,
+    ) -> None:
+        pass
+
+
 class Wav2VecFeatureExtractor(Wav2VecBase):
     def __init__(self, num_classes, pretrained_out_dim=(512, 226), finetune_pretrained=True):
         super(Wav2VecFeatureExtractor, self).__init__(num_classes=num_classes)
@@ -110,29 +151,6 @@ class Wav2VecFeatureExtractorGAP(Wav2VecBase):
         features = self.cls_net(torch.unsqueeze(features, dim=1))
         # we feed this image in the cls_net that gives the classification tensor
         y_pred = torch.reshape(features, shape=(features.shape[0], features.shape[1]))
-        return y_pred
-
-
-class Wav2VecCLSPaperFinetuning(Wav2VecBase):
-
-    def __init__(self, num_classes):
-        super(Wav2VecCLSPaperFinetuning, self).__init__(num_classes)
-
-        # We replace the pretrained model with the one with the CLS token
-        self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
-
-        # freezing the model at first
-        # (then we will train also the transformer, feature extractor will remain frozen)
-        for name, param in self.pretrained_model.named_parameters():
-            param.requires_grad = False
-
-        # then we add on top the classification layer to be trained
-        self.linear_layer = torch.nn.Linear(self.pretrained_model.config.hidden_size, num_classes)
-
-    def forward(self, x):
-        cls_token, _ = self.pretrained_model(x)
-
-        y_pred = self.linear_layer(cls_token)
         return y_pred
 
 
