@@ -9,7 +9,7 @@ from scripts.utils import get_model, get_model_from_checkpoint
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import Trainer
 
-# import wandb
+import wandb
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning import seed_everything
 
