@@ -1,2 +1,3 @@
+# @package _group_
 name: basic
-lr: 2e-5
+lr: 3e-5

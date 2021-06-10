@@ -1,5 +1,3 @@
+# @package _group_
 name: Wav2Vec
-lr: [2e-5, 3e-5]
-# warmed up for first 10%
-# constant for the second 40%
-# linearly decaying for the last 50%
+lr: 3e-5

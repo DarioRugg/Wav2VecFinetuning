@@ -1,8 +1,12 @@
+from typing import Optional, Callable
+import itertools
+
 import torch
 from torch import nn
 from torch.nn.functional import cross_entropy
 import pytorch_lightning as pl
 from pytorch_lightning.metrics.functional import accuracy
+from torch.optim import Optimizer
 from transformers import Wav2Vec2Model, Wav2Vec2Config
 from scripts.models.wav2vec2_modified import Wav2VecModelOverridden
 
@@ -51,15 +55,17 @@ class Wav2VecBase(pl.LightningModule):
 
 class Wav2VecCLSPaperFinetuning(Wav2VecBase):
 
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, learning_rate, num_epochs):
         super(Wav2VecCLSPaperFinetuning, self).__init__(num_classes)
+
+        self.lr = learning_rate
+        self.num_epochs = num_epochs
 
         # We replace the pretrained model with the one with the CLS token
         self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
 
-        # freezing the model at first
-        # (then we will train also the transformer, feature extractor will remain frozen)
-        for name, param in self.pretrained_model.named_parameters():
+        # freezing the feature extractor (we are not going to finetune it)
+        for name, param in self.pretrained_model.feature_extractor.named_parameters():
             param.requires_grad = False
 
         # then we add on top the classification layer to be trained
@@ -73,9 +79,17 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
 
     # here we must define the optimizer and the different learning rate
     def configure_optimizers(self):
-        pass
+        optimizer_linear_layer = torch.optim.Adam(params=self.linear_layer.parameters(), lr=self.lr)
 
-    # here we must perform different schedulers at different time
+        params = [self.pretrained_model.feature_projection.parameters(),
+                  self.pretrained_model.encoder.parameters(),
+                  self.linear_layer.parameters()]
+        optimizer_linear_and_encoder = torch.optim.Adam(
+            # params=itertools.chain(*params),
+            params=itertools.chain(*params),
+            lr=self.lr)
+        return [optimizer_linear_layer, optimizer_linear_and_encoder]
+
     def optimizer_step(
             self,
             epoch: int = None,
@@ -87,7 +101,31 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
             using_native_amp: bool = None,
             using_lbfgs: bool = None,
     ) -> None:
-        pass
+
+        # for the first 30% of updates we train only the linear layer
+        # for the rest of the updates the encoder gets finetuned as well
+        if (0.3 >= epoch / self.num_epochs and optimizer_idx == 0) or \
+                (0.3 < epoch / self.num_epochs and optimizer_idx == 1):
+
+            # warm-up for the first 10%
+            if epoch < self.num_epochs // 10:
+                lr_scale = min(1., float(epoch + 1) / float(self.num_epochs // 10))
+                for pg in optimizer.param_groups:
+                    pg['lr'] = lr_scale * self.lr
+            # constant learning rate for the next 40%
+            elif epoch < self.num_epochs // 2:
+                for pg in optimizer.param_groups:
+                    pg['lr'] = self.lr
+            # linearly decaying for the final 50%
+            else:
+                lr_scale = min(1.,
+                               1 - (float(epoch - self.num_epochs // 2) / float(
+                                   self.num_epochs - self.num_epochs // 2)))
+                for pg in optimizer.param_groups:
+                    pg['lr'] = lr_scale * self.lr
+
+            # update params
+            optimizer.step(closure=optimizer_closure)
 
 
 class Wav2VecFeatureExtractor(Wav2VecBase):
@@ -215,7 +253,6 @@ class Wav2VecCLSTokenNotPretrained(Wav2VecBase):
         self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
 
     def forward(self, x):
-
         cls_token, _ = self.pretrained_model(x)
 
         y_pred = self.softmax_activation(self.linear_layer(cls_token))

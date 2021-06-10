@@ -7,7 +7,7 @@ import os
 
 from scripts.classification_models import SpectrogramCNN
 from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractorGAP, Wav2VecFeezingEncoderOnly, \
-    Wav2VecCLSToken, Wav2VecCLSTokenNotPretrained, Wav2VecFeatureExtractor
+    Wav2VecCLSToken, Wav2VecCLSTokenNotPretrained, Wav2VecFeatureExtractor, Wav2VecCLSPaperFinetuning
 from efficientnet_pytorch import EfficientNet
 
 
@@ -72,6 +72,10 @@ def get_model(cfg):
             return Wav2VecCLSToken(num_classes=cfg.dataset.number_of_classes)
         elif cfg.model.option == "cls_token_not_pretrained":
             return Wav2VecCLSTokenNotPretrained(num_classes=cfg.dataset.number_of_classes)
+        elif cfg.model.option == "paper":
+            return Wav2VecCLSPaperFinetuning(num_classes=cfg.dataset.number_of_classes,
+                                             learning_rate=cfg.optimizer.lr,
+                                             num_epochs=cfg.model.epochs)
 
 
 def get_model_from_checkpoint(cfg, checkpoint_path):
@@ -98,6 +102,11 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
         elif cfg.model.option == "cls_token_not_pretrained":
             return Wav2VecCLSTokenNotPretrained.load_from_checkpoint(checkpoint_path,
                                                                      num_classes=cfg.dataset.number_of_classes)
+        elif cfg.model.option == "paper":
+            return Wav2VecCLSPaperFinetuning.load_from_checkpoint(checkpoint_path,
+                                                                  num_classes=cfg.dataset.number_of_classes,
+                                                                  learning_rate=cfg.optimizer.lr,
+                                                                  num_epochs=cfg.model.epochs)
     else:
         raise (cfg.model.name, "not integrated with pytorch lightening yet!")
 
