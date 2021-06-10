@@ -2,6 +2,7 @@ from typing import Optional, Callable
 import itertools
 
 import torch
+from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 from torch import nn
 from torch.nn.functional import cross_entropy
 import pytorch_lightning as pl
@@ -64,8 +65,8 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
         # We replace the pretrained model with the one with the CLS token
         self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
 
-        # freezing the feature extractor (we are not going to finetune it)
-        for name, param in self.pretrained_model.feature_extractor.named_parameters():
+        # freezing the pretrained model
+        for name, param in self.pretrained_model.named_parameters():
             param.requires_grad = False
 
         # then we add on top the classification layer to be trained
@@ -79,16 +80,18 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
 
     # here we must define the optimizer and the different learning rate
     def configure_optimizers(self):
-        optimizer_linear_layer = torch.optim.Adam(params=self.linear_layer.parameters(), lr=self.lr)
+        return torch.optim.Adam(params=self.parameters(), lr=self.lr)
 
-        params = [self.pretrained_model.feature_projection.parameters(),
-                  self.pretrained_model.encoder.parameters(),
-                  self.linear_layer.parameters()]
-        optimizer_linear_and_encoder = torch.optim.Adam(
-            # params=itertools.chain(*params),
-            params=itertools.chain(*params),
-            lr=self.lr)
-        return [optimizer_linear_layer, optimizer_linear_and_encoder]
+    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
+
+        super(Wav2VecCLSPaperFinetuning, self).training_epoch_end(outputs)
+
+        # after the first part of training we unfreeze the feature_projection and the encoder
+        if 0.3 < (self.current_epoch+1) / self.num_epochs:
+            for name, param in self.pretrained_model.feature_projection.named_parameters():
+                param.requires_grad = True
+            for name, param in self.pretrained_model.encoder.named_parameters():
+                param.requires_grad = True
 
     def optimizer_step(
             self,
@@ -102,30 +105,25 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
             using_lbfgs: bool = None,
     ) -> None:
 
-        # for the first 30% of updates we train only the linear layer
-        # for the rest of the updates the encoder gets finetuned as well
-        if (0.3 >= epoch / self.num_epochs and optimizer_idx == 0) or \
-                (0.3 < epoch / self.num_epochs and optimizer_idx == 1):
+        # warm-up for the first 10%
+        if epoch < self.num_epochs // 10:
+            lr_scale = min(1., float(epoch + 1) / float(self.num_epochs // 10))
+            for pg in optimizer.param_groups:
+                pg['lr'] = lr_scale * self.lr
+        # constant learning rate for the next 40%
+        elif epoch < self.num_epochs // 2:
+            for pg in optimizer.param_groups:
+                pg['lr'] = self.lr
+        # linearly decaying for the final 50%
+        else:
+            lr_scale = min(1.,
+                           1 - (float(epoch - self.num_epochs // 2) / float(
+                               self.num_epochs - self.num_epochs // 2)))
+            for pg in optimizer.param_groups:
+                pg['lr'] = lr_scale * self.lr
 
-            # warm-up for the first 10%
-            if epoch < self.num_epochs // 10:
-                lr_scale = min(1., float(epoch + 1) / float(self.num_epochs // 10))
-                for pg in optimizer.param_groups:
-                    pg['lr'] = lr_scale * self.lr
-            # constant learning rate for the next 40%
-            elif epoch < self.num_epochs // 2:
-                for pg in optimizer.param_groups:
-                    pg['lr'] = self.lr
-            # linearly decaying for the final 50%
-            else:
-                lr_scale = min(1.,
-                               1 - (float(epoch - self.num_epochs // 2) / float(
-                                   self.num_epochs - self.num_epochs // 2)))
-                for pg in optimizer.param_groups:
-                    pg['lr'] = lr_scale * self.lr
-
-            # update params
-            optimizer.step(closure=optimizer_closure)
+        # update params
+        optimizer.step(closure=optimizer_closure)
 
 
 class Wav2VecFeatureExtractor(Wav2VecBase):
