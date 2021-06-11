@@ -88,7 +88,7 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
             # params=itertools.chain(*params),
             params=itertools.chain(*params),
             lr=self.lr)
-        return [optimizer_linear_layer, optimizer_linear_and_encoder]
+        return optimizer_linear_layer, optimizer_linear_and_encoder
 
     def optimizer_step(
             self,
