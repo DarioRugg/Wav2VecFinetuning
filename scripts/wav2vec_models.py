@@ -15,7 +15,7 @@ class Wav2VecBase(pl.LightningModule):
     def __init__(self, num_classes):
         super(Wav2VecBase, self).__init__()
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, batch_idx, optimizer_idx):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
