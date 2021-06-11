@@ -111,18 +111,15 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
             if epoch < self.num_epochs // 10:
                 lr_scale = min(1., float(epoch + 1) / float(self.num_epochs // 10))
                 for pg in optimizer.param_groups:
-                    pg['lr'] = lr_scale * self.lr
+                    pg['lr'] = lr_scale * optimizer.defaults["lr"]
             # constant learning rate for the next 40%
-            elif epoch < self.num_epochs // 2:
-                for pg in optimizer.param_groups:
-                    pg['lr'] = self.lr
             # linearly decaying for the final 50%
-            else:
+            elif epoch >= self.num_epochs // 2:
                 lr_scale = min(1.,
                                1 - (float(epoch - self.num_epochs // 2) / float(
                                    self.num_epochs - self.num_epochs // 2)))
                 for pg in optimizer.param_groups:
-                    pg['lr'] = lr_scale * self.lr
+                    pg['lr'] = lr_scale * optimizer.defaults["lr"]
 
             # update params
             optimizer.step(closure=optimizer_closure)

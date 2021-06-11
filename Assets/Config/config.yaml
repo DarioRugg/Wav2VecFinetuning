@@ -1,6 +1,7 @@
 simulation_name: server_test
 train: true
 test: false
+unit_test: false # [false, true, int]
 
 defaults:
   - machine: server

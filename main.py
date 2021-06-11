@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -16,10 +17,15 @@ from pytorch_lightning import seed_everything
 import logging
 logger = logging.getLogger("__name__")
 
+os.environ["HYDRA_FULL_ERROR"] = "1"
+
 @hydra.main(config_path=Path(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
 
     logger.info(OmegaConf.to_yaml(cfg))
+    # if it's just an home test we run in offline mode
+    if cfg.simulation_name == "home_test":
+        os.environ["WANDB_MODE"] = "offline"
 
     seed_everything(0)
 
@@ -41,6 +47,7 @@ def main(cfg: DictConfig):
         save_weights_only=False
     )
     trainer = Trainer(
+        fast_dev_run=cfg.unit_test,
         logger=wandb_logger,  # W&B integration
         max_epochs=cfg.model.epochs,  # number of epochs
         callbacks=[checkpoint_callback],

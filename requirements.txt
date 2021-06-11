@@ -3,7 +3,7 @@ efficientnet_pytorch
 transformers~=4.4.2
 librosa~=0.8.0
 pandas~=1.2.0
-numpy~=1.19.5
+numpy
 tensorboard
 pytorch-lightning
 hydra
