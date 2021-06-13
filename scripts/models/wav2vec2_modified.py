@@ -113,7 +113,6 @@ class Wav2VecModelOverridden(Wav2Vec2Model):
     def __init__(self, config):
         super().__init__(config=config)
         self.cls_token = torch.unsqueeze(torch.normal(mean=0, std=1, size=[self.config.hidden_size]), dim=0)
-        print("\n\n\n ------------> shapeclstoken", self.cls_token.shape, "\n\n\n")
 
     @add_start_docstrings_to_model_forward(WAV_2_VEC_2_INPUTS_DOCSTRING)
     @replace_return_docstrings(output_type=BaseModelOutput, config_class=_CONFIG_FOR_DOC)
@@ -192,8 +191,9 @@ class Wav2VecModelOverridden(Wav2Vec2Model):
                 mask_feature_indices = torch.from_numpy(mask_feature_indices).to(hidden_states.device)
                 hidden_states[mask_feature_indices[:, None].expand(-1, sequence_length, -1)] = 0
 
-        # cls_token_per_batch = torch.stack([self.cls_token] * hidden_states.size()[0], dim=0)
+        # adding the classification token
         hidden_states_with_token = torch.cat([self.cls_token.expand((hidden_states.size()[0], -1, -1)), hidden_states], dim=1)
+
         encoder_outputs = self.encoder(
             hidden_states_with_token,
             attention_mask=attention_mask,
