@@ -12,7 +12,7 @@ defaults:
   - path: paths
 
   # compose the colorlog job_logging config
-  - hydra/job_logging: colorlog
+  - hydra/job_logging: stdout
 
   - override custom_configs: for_${defaults.1.model}
     optional: true
