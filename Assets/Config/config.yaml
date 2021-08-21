@@ -17,6 +17,16 @@ defaults:
 
   - path: paths
 
-  # for coloring logs:
-  - hydra/hydra_logging: colorlog
+  # compose the colorlog job_logging config
   - hydra/job_logging: colorlog
+
+# override the formatting.
+hydra:
+  job_logging:
+    formatters:
+      colorlog:
+        format: '[%(blue)s%(name)s%(reset)s][%(log_color)s%(levelname)s%(reset)s] - %(message)s'
+
+  # for coloring logs:
+  #- hydra/hydra_logging: colorlog
+  #- hydra/job_logging: colorlog
