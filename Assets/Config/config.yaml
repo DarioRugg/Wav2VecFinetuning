@@ -8,25 +8,15 @@ defaults:
   - model: Wav2Vec
   - optimizer: Wav2Vec
   - dataset: DEMoS
+  - custom_configs: for_${defaults.1.model}
+    optional: true
+  - custom_configs: for_${defaults.3.dataset}
+    optional: true
+  - custom_configs: for_${defaults.3.dataset}_&_${defaults.1.model}
+    optional: true
 
   - path: paths
 
-  # compose the colorlog job_logging config
-  - hydra/job_logging: stdout
-
-  - override custom_configs: for_${defaults.1.model}
-    optional: true
-  - override custom_configs: for_${defaults.3.dataset}
-    optional: true
-  - override custom_configs: for_${defaults.3.dataset}_&_${defaults.1.model}
-    optional: true
-# override the formatting.
-hydra:
-  job_logging:
-    formatters:
-      colorlog:
-        format: '[%(blue)s%(name)s%(reset)s][%(log_color)s%(levelname)s%(reset)s] - %(message)s'
-
   # for coloring logs:
-  #- hydra/hydra_logging: colorlog
-  #- hydra/job_logging: colorlog
+  - hydra/hydra_logging: colorlog
+  - hydra/job_logging: colorlog
