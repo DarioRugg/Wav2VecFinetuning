@@ -20,5 +20,5 @@ defaults:
   - path: paths
 
   # for coloring logs:
-  - hydra/job_logging: colorlog
   - hydra/hydra_logging: colorlog
+  - hydra/job_logging: colorlog
