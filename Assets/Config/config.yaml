@@ -11,15 +11,15 @@ defaults:
 
   - path: paths
 
+  # compose the colorlog job_logging config
+  - hydra/job_logging: colorlog
+
   - override custom_configs: for_${defaults.1.model}
     optional: true
   - override custom_configs: for_${defaults.3.dataset}
     optional: true
   - override custom_configs: for_${defaults.3.dataset}_&_${defaults.1.model}
     optional: true
-  # compose the colorlog job_logging config
-  - hydra/job_logging: colorlog
-
 # override the formatting.
 hydra:
   job_logging:
