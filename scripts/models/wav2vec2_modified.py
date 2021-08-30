@@ -112,7 +112,7 @@ WAV_2_VEC_2_INPUTS_DOCSTRING = r"""
 class Wav2VecModelOverridden(Wav2Vec2Model):
     def __init__(self, config):
         super().__init__(config=config)
-        self.cls_token = torch.unsqueeze(torch.normal(mean=0, std=1, size=[self.config.hidden_size]), dim=0)
+        self.cls_token = torch.unsqueeze(torch.normal(mean=0, std=1, size=[self.config.hidden_size]), dim=0).cuda()
 
     @add_start_docstrings_to_model_forward(WAV_2_VEC_2_INPUTS_DOCSTRING)
     @replace_return_docstrings(output_type=BaseModelOutput, config_class=_CONFIG_FOR_DOC)
