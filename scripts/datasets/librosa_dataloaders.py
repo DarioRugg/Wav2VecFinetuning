@@ -129,7 +129,7 @@ class DEMoSDataset(BaseDataset):
         self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels, "speaker": speakers})
 
     def get_speakers(self):
-        return self.wav_path_label_df.speakers
+        return self.wav_path_label_df.speaker
 
 
 """
@@ -176,5 +176,5 @@ class RAVDESSDataset(BaseDataset):
         # speaker split for RAVDESS must be implemented yet!
         self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels, "speaker": None})
 
-        def get_speakers():
-            pass
+    def get_speakers(self):
+        pass
