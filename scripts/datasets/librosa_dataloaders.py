@@ -123,8 +123,8 @@ class DEMoSDataset(BaseDataset):
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(demos_dir)))) + list(
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(neu_dir))))
         speakers = list(
-            map(lambda fname: int(fname.split("_")[2]), sorted(os.listdir(demos_dir)))) + list(
-            map(lambda fname: int(fname.split("_")[2]), sorted(os.listdir(neu_dir))))
+            map(lambda fname: int(fname.split("_")[-2]), sorted(os.listdir(demos_dir)))) + list(
+            map(lambda fname: int(fname.split("_")[-2]), sorted(os.listdir(neu_dir))))
 
         self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels, "speaker": speakers})
 
