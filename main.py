@@ -29,7 +29,7 @@ def main(cfg: DictConfig):
 
     seed_everything(0)
 
-    wandb.init(project="emoaudio")
+    wandb.init(entity="emoaudio", project="speaker_split")
     wandb_logger = WandbLogger(project=cfg.simulation_name)
 
     # ------------------> Dataset <-----------------------

@@ -122,8 +122,14 @@ class DEMoSDataset(BaseDataset):
         labels = list(
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(demos_dir)))) + list(
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(neu_dir))))
+        speakers = list(
+            map(lambda fname: int(fname.split("_")[2]), sorted(os.listdir(demos_dir)))) + list(
+            map(lambda fname: int(fname.split("_")[2]), sorted(os.listdir(neu_dir))))
 
-        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
+        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels, "speaker": speakers})
+
+    def get_speakers(self):
+        return self.wav_path_label_df.speakers
 
 
 """
@@ -167,4 +173,8 @@ class RAVDESSDataset(BaseDataset):
             map(lambda fname: int(fname.split("-")[2]) - 1, sorted(os.listdir(os.path.join(root_dir, actor_path))))),
                                                         sorted(os.listdir(root_dir)))))
 
-        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
+        # speaker split for RAVDESS must be implemented yet!
+        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels, "speaker": None})
+
+        def get_speakers():
+            pass

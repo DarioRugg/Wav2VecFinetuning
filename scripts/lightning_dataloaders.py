@@ -3,10 +3,12 @@ from hydra.utils import get_original_cwd
 from pathlib import Path
 from scripts.datasets.librosa_dataloaders import DEMoSDataset, RAVDESSDataset
 
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, Subset
 import torch
 import pytorch_lightning as pl
 
+import random
+random.seed(1234)
 
 class DataModule(pl.LightningDataModule):
 
@@ -32,6 +34,7 @@ class DataModule(pl.LightningDataModule):
             raise Exception("Requested dataset, doesn't exist yet")
 
         # ------------------> Split < -----------------------
+        """
         self.train, self.val, self.test = random_split(dataset=dataset,
                                                        lengths=[round(len(dataset) * .8),  # train
                                                                 round(len(dataset) * .1),  # val
@@ -39,6 +42,14 @@ class DataModule(pl.LightningDataModule):
                                                                 - round(len(dataset) * .1)],  # test
                                                        generator=torch.Generator().manual_seed(
                                                            self.cfg.dataset.split_seed))
+        """
+
+        speakers = dataset.get_speakers()
+        speakers_id = speakers.unique()
+        random.shuffle(speakers_id)
+        self.train = Subset(dataset, speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
+        self.val = Subset(dataset, speakers.index[speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)])])
+        self.test = Subset(dataset, speakers.index[speakers.isin(speakers_id[-round(len(speakers_id) * .1):])])
 
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.cfg.machine.training_batches,
