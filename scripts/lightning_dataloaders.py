@@ -49,8 +49,8 @@ class DataModule(pl.LightningDataModule):
         speakers = dataset.get_speakers()
         speakers_id = speakers.unique()
         random.shuffle(speakers_id)
-        print("all : ", dataset.wav_path_label_df)
-        print("val speakers: ", dataset.wav_path_label_df[speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)])])
+        print("all : ", dataset.wav_path_label_df["wav_path"].apply(lambda path: path[-13:]))
+        print("val speakers: ", dataset.wav_path_label_df[speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1), "wav_path"].apply(lambda path: path[-13:]))])
         print("val speakers: ", speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)].tolist())
         self.train = Subset(dataset, speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
         self.val = Subset(dataset, speakers.index[
