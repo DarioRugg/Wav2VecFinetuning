@@ -119,8 +119,6 @@ class DEMoSDataset(BaseDataset):
 
         paths = list(map(lambda fname: fname, sorted(demos_dir.iterdir()))) + list(
             map(lambda fname: fname, sorted(neu_dir.iterdir())))
-        paths = list(map(lambda fname: fname[-13:], sorted(demos_dir.iterdir()))) + list(
-            map(lambda fname: fname[-13:], sorted(neu_dir.iterdir())))
         labels = list(
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(demos_dir)))) + list(
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(neu_dir))))

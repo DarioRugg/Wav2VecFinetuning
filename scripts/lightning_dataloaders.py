@@ -49,6 +49,7 @@ class DataModule(pl.LightningDataModule):
         speakers = dataset.get_speakers()
         speakers_id = speakers.unique()
         random.shuffle(speakers_id)
+        print("all : ", dataset.wav_path_label_df)
         print("train speakers: ", dataset.wav_path_label_df[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
         print("train speakers: ", speakers_id[:round(len(speakers_id) * .8)].tolist())
         self.train = Subset(dataset, speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
