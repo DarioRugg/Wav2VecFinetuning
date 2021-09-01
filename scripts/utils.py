@@ -5,7 +5,7 @@ from scripts.datasets.librosa_dataloaders import DEMoSDataset, RAVDESSDataset
 from os.path import join
 import os
 
-from scripts.classification_models import SpectrogramCNN
+from scripts.classification_models import SpectrogramCNN, EfficientNetModel
 from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractorGAP, Wav2VecFeezingEncoderOnly, \
     Wav2VecCLSToken, Wav2VecCLSTokenNotPretrained, Wav2VecFeatureExtractor, Wav2VecCLSPaperFinetuning
 from efficientnet_pytorch import EfficientNet
@@ -55,8 +55,7 @@ def get_model(cfg):
     if cfg.model.name.lower() == "cnn":
         return SpectrogramCNN(input_size=cfg.model.input_size, class_number=cfg.dataset.number_of_classes)
     elif cfg.model.name.lower() == "efficientnet":
-        return EfficientNet.from_pretrained(model_name=f"efficientnet-b{cfg.model.blocks}", in_channels=1,
-                                            num_classes=cfg.dataset.number_of_classes)
+        return EfficientNetModel(num_classes=cfg.dataset.number_of_classes, blocks=cfg.model.blocks)
     elif cfg.model.name.lower() == "wav2vec":
         if cfg.model.option == "partial":
             return Wav2VecFeezingEncoderOnly(num_classes=cfg.dataset.number_of_classes)
@@ -82,6 +81,9 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
     if cfg.model.name.lower() == "cnn":
         return SpectrogramCNN.load_from_checkpoint(checkpoint_path, input_size=cfg.model.input_size,
                                                    class_number=cfg.dataset.number_of_classes)
+    elif cfg.model.name.lower() == "efficientnet":
+        return EfficientNetModel.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes,
+                                                      blocks=cfg.model.blocks)
     elif cfg.model.name.lower() == "wav2vec":
         if cfg.model.option == "partial":
             return Wav2VecFeezingEncoderOnly.load_from_checkpoint(checkpoint_path,
