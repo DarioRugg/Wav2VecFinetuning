@@ -35,10 +35,6 @@ def main(cfg: DictConfig):
     # ------------------> Dataset <-----------------------
     data_module = DataModule(config=cfg)
 
-    print("train 0: ", next(iter(data_module.train_dataloader())))
-    print("val 0: ", next(iter(data_module.val_dataloader())))
-    print("test 0: ", next(iter(data_module.test_dataloader())))
-
     # ------------------> Model <-----------------------
     model = get_model(cfg)
 
