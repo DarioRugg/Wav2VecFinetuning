@@ -57,6 +57,10 @@ class DataModule(pl.LightningDataModule):
         print("train 0: ", self.train[torch.tensor([0, 1, 2, 300, 301, 302])])
         print("val 0: ", self.val[torch.tensor([0, 1, 2, 30, 31, 32])])
         print("test 0: ", self.test[torch.tensor([0, 1, 2, 30, 31, 32])])
+        print("speakers:")
+        print(" train: ", self.train.get_speakers().unique())
+        print(" val: ", self.val.get_speakers().unique())
+        print(" test: ", self.test.get_speakers().unique())
 
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.cfg.machine.training_batches,
