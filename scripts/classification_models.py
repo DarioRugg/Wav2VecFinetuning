@@ -89,8 +89,8 @@ class EfficientNetModel(BaseLightningModel):
     def __init__(self, num_classes, blocks):
         super(EfficientNetModel, self).__init__()
 
-        EfficientNet.from_pretrained(model_name=f"efficientnet-b{blocks}", in_channels=1,
+        self.model = EfficientNet.from_pretrained(model_name=f"efficientnet-b{blocks}", in_channels=1,
                                             num_classes=num_classes)
 
     def forward(self, x):
-        return self(x)
+        return self.model(x)
