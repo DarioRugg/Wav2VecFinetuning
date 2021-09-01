@@ -29,11 +29,15 @@ def main(cfg: DictConfig):
 
     seed_everything(0)
 
-    wandb.init(entity="emoaudio", project="speaker_split")
+    wandb.init(project="speaker_split")
     wandb_logger = WandbLogger(project=cfg.simulation_name)
 
     # ------------------> Dataset <-----------------------
     data_module = DataModule(config=cfg)
+
+    print("train 0: ", next(data_module.train_dataloader()))
+    print("val 0: ", next(data_module.val_dataloader()))
+    print("test 0: ", next(data_module.test_dataloader()))
 
     # ------------------> Model <-----------------------
     model = get_model(cfg)
@@ -41,7 +45,7 @@ def main(cfg: DictConfig):
     checkpoint_callback = ModelCheckpoint(
         monitor='val_loss',
         dirpath='./models',
-        filename='sample-mnist-{epoch:02d}-{val_loss:.2f}',
+        filename='checkpoint-model-{epoch:02d}-{val_loss:.2f}',
         save_top_k=3,
         mode='min',
         save_weights_only=False
