@@ -36,23 +36,24 @@ class DataModule(pl.LightningDataModule):
             raise Exception("Requested dataset, doesn't exist yet")
 
         # ------------------> Split < -----------------------
-        """
-        self.train, self.val, self.test = random_split(dataset=dataset,
-                                                       lengths=[round(len(dataset) * .8),  # train
-                                                                round(len(dataset) * .1),  # val
-                                                                len(dataset) - round(len(dataset) * .8)
-                                                                - round(len(dataset) * .1)],  # test
-                                                       generator=torch.Generator().manual_seed(
-                                                           self.cfg.dataset.split_seed))
-        """
-
-        speakers = dataset.get_speakers()
-        speakers_id = speakers.unique()
-        random.shuffle(speakers_id)
-        self.train = Subset(dataset, speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
-        self.val = Subset(dataset, speakers.index[
-            speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)])])
-        self.test = Subset(dataset, speakers.index[speakers.isin(speakers_id[-round(len(speakers_id) * .1):])])
+        if self.cfg.dataset.speaker_split:
+            # -----> By Speaker <------
+            speakers = dataset.get_speakers()
+            speakers_id = speakers.unique()
+            random.shuffle(speakers_id)
+            self.train = Subset(dataset, speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
+            self.val = Subset(dataset, speakers.index[
+                speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)])])
+            self.test = Subset(dataset, speakers.index[speakers.isin(speakers_id[-round(len(speakers_id) * .1):])])
+        else:
+            # -----> Random <------
+            self.train, self.val, self.test = random_split(dataset=dataset,
+                                                           lengths=[round(len(dataset) * .8),  # train
+                                                                    round(len(dataset) * .1),  # val
+                                                                    len(dataset) - round(len(dataset) * .8)
+                                                                    - round(len(dataset) * .1)],  # test
+                                                           generator=torch.Generator().manual_seed(
+                                                               self.cfg.dataset.split_seed))
 
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.cfg.machine.training_batches,
