@@ -8,7 +8,7 @@ from efficientnet_pytorch import EfficientNet
 
 class BaseLightningModel(pl.LightningModule):
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
