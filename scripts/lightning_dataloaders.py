@@ -55,8 +55,8 @@ class DataModule(pl.LightningDataModule):
         self.test = Subset(dataset, speakers.index[speakers.isin(speakers_id[-round(len(speakers_id) * .1):])])
 
         print("train 0: ", self.train[torch.tensor([0, 1, 2, 300, 301, 302])])
-        print("val 0: ", self.val[torch.tensor([0, 1, 2, 300, 301, 302])])
-        print("test 0: ", self.test[torch.tensor([0, 1, 2, 300, 301, 302])])
+        print("val 0: ", self.val[torch.tensor([0, 1, 2, 30, 31, 32])])
+        print("test 0: ", self.test[torch.tensor([0, 1, 2, 30, 31, 32])])
 
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.cfg.machine.training_batches,
