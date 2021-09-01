@@ -1,37 +1,48 @@
 import torch
 import numpy as np
-import torch.nn.functional as F
+from torch.nn.functional import cross_entropy
+from pytorch_lightning.metrics.functional import accuracy
 import pytorch_lightning as pl
 from efficientnet_pytorch import EfficientNet
 
 
 class BaseLightningModel(pl.LightningModule):
-    def training_step(self, batch, batch_idx):
+
+    def training_step(self, batch, batch_idx, optimizer_idx):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        self.log('train_loss', loss)
+        loss = cross_entropy(y_hat, y)
+        self.log('train_loss', loss, on_step=True)
+        y_hat = torch.argmax(y_hat, dim=1)
+        acc = accuracy(y_hat, y)
+        self.log('val_acc', acc, on_step=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        self.log('val_loss', loss)
+        loss = cross_entropy(y_hat, y)
+        self.log('val_loss', loss, on_epoch=True)
+        y_hat = torch.argmax(y_hat, dim=1)
+        acc = accuracy(y_hat, y)
+        self.log('val_acc', acc, on_epoch=True)
         return loss
 
     def test_step(self, batch, batch_idx):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        self.log('test_loss', loss)
+        loss = cross_entropy(y_hat, y)
+        self.log('test_loss', loss, on_epoch=True)
+        y_hat = torch.argmax(y_hat, dim=1)
+        acc = accuracy(y_hat, y)
+        self.log('test_acc', acc, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr=2e-5)
         return optimizer
 
 
