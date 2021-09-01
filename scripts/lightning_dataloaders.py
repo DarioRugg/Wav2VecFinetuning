@@ -49,6 +49,7 @@ class DataModule(pl.LightningDataModule):
         speakers = dataset.get_speakers()
         speakers_id = speakers.unique()
         random.shuffle(speakers_id)
+        print("train speakers: ", speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
         self.train = Subset(dataset, speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
         self.val = Subset(dataset, speakers.index[
             speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)])])
