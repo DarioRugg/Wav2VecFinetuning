@@ -97,11 +97,17 @@ class SpectrogramCNN(BaseLightningModel):
 
 
 class EfficientNetModel(BaseLightningModel):
-    def __init__(self, num_classes, blocks):
+    def __init__(self, num_classes, blocks, learning_rate):
         super(EfficientNetModel, self).__init__()
 
+        self.lr = learning_rate
+
         self.model = EfficientNet.from_pretrained(model_name=f"efficientnet-b{blocks}", in_channels=1,
-                                            num_classes=num_classes)
+                                                  num_classes=num_classes)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
 
     def forward(self, x):
         return self.model(x)

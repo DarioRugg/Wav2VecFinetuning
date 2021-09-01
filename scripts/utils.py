@@ -55,7 +55,8 @@ def get_model(cfg):
     if cfg.model.name.lower() == "cnn":
         return SpectrogramCNN(input_size=cfg.model.input_size, class_number=cfg.dataset.number_of_classes)
     elif cfg.model.name.lower() == "efficientnet":
-        return EfficientNetModel(num_classes=cfg.dataset.number_of_classes, blocks=cfg.model.blocks)
+        return EfficientNetModel(num_classes=cfg.dataset.number_of_classes, blocks=cfg.model.blocks,
+                                 learning_rate=cfg.optimizer.lr)
     elif cfg.model.name.lower() == "wav2vec":
         if cfg.model.option == "partial":
             return Wav2VecFeezingEncoderOnly(num_classes=cfg.dataset.number_of_classes)
@@ -83,7 +84,7 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
                                                    class_number=cfg.dataset.number_of_classes)
     elif cfg.model.name.lower() == "efficientnet":
         return EfficientNetModel.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes,
-                                                      blocks=cfg.model.blocks)
+                                                      blocks=cfg.model.blocks, learning_rate=cfg.optimizer.lr)
     elif cfg.model.name.lower() == "wav2vec":
         if cfg.model.option == "partial":
             return Wav2VecFeezingEncoderOnly.load_from_checkpoint(checkpoint_path,
