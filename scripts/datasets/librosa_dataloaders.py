@@ -28,7 +28,7 @@ class BaseDataset(Dataset):
         self.sampling_rate = sampling_rate
         self.transform = transform
 
-        self.wav_path_label_df, self.classes_dict = None, None
+        self.wav_path_label_df, self.speakers, self.classes_dict = None, None, None
 
     def __len__(self):
         return len(self.wav_path_label_df)
@@ -122,14 +122,18 @@ class DEMoSDataset(BaseDataset):
         labels = list(
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(demos_dir)))) + list(
             map(lambda fname: self.classes.index(fname.split("_")[-1][:3]), sorted(os.listdir(neu_dir))))
+
+        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
+
+        # keeping track of the speakers of each audio
         speakers = list(
             map(lambda fname: int(fname.split("_")[-2]), sorted(os.listdir(demos_dir)))) + list(
             map(lambda fname: int(fname.split("_")[-2]), sorted(os.listdir(neu_dir))))
 
-        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels, "speaker": speakers})
+        self.speakers = pd.Series(speakers, index=self.wav_path_label_df.index, name="speakers")
 
     def get_speakers(self):
-        return self.wav_path_label_df.speaker
+        return self.speakers
 
 
 """
@@ -173,8 +177,14 @@ class RAVDESSDataset(BaseDataset):
             map(lambda fname: int(fname.split("-")[2]) - 1, sorted(os.listdir(os.path.join(root_dir, actor_path))))),
                                                         sorted(os.listdir(root_dir)))))
 
-        # speaker split for RAVDESS must be implemented yet!
-        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels, "speaker": None})
+        self.wav_path_label_df = pd.DataFrame({"wav_path": paths, "label": labels})
+
+        # keeping track of the speakers of each audio
+        speakers = []
+        for actor_name in sorted(os.listdir(root_dir)):
+            speakers += [int(actor_name.split("_")[-1])] * len(os.listdir(os.path.join(root_dir, actor_name)))
+
+        self.speakers = pd.Series(speakers, index=self.wav_path_label_df.index, name="speakers")
 
     def get_speakers(self):
-        pass
+        return self.speakers

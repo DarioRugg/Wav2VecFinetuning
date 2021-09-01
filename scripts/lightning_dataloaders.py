@@ -49,25 +49,14 @@ class DataModule(pl.LightningDataModule):
         speakers = dataset.get_speakers()
         speakers_id = speakers.unique()
         random.shuffle(speakers_id)
-        print("all : ", dataset.wav_path_label_df["wav_path"].apply(lambda path: str(path)[-13:]))#.apply(lambda path: path[-13:]))
-        print("val speakers: ", dataset.wav_path_label_df[speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1), "wav_path"].apply(lambda path: str(path)[-13:]))])
-        print("val speakers: ", speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)].tolist())
         self.train = Subset(dataset, speakers.index[speakers.isin(speakers_id[:round(len(speakers_id) * .8)])])
         self.val = Subset(dataset, speakers.index[
             speakers.isin(speakers_id[round(len(speakers_id) * .8):-round(len(speakers_id) * .1)])])
         self.test = Subset(dataset, speakers.index[speakers.isin(speakers_id[-round(len(speakers_id) * .1):])])
 
-        print("train 0: ", self.train[torch.tensor([0, 1, 2, 300, 301, 302])])
-        print("val 0: ", self.val[torch.tensor([0, 1, 2, 30, 31, 32])])
-        print("test 0: ", self.test[torch.tensor([0, 1, 2, 30, 31, 32])])
-        print("speakers:")
-        print(" train: ", self.train.get_speakers().unique())
-        print(" val: ", self.val.get_speakers().unique())
-        print(" test: ", self.test.get_speakers().unique())
-
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.cfg.machine.training_batches,
-                          num_workers=self.cfg.machine.workers)
+                          num_workers=self.cfg.machine.workers, shuffle=True)
 
     def val_dataloader(self):
         return DataLoader(self.val, batch_size=self.cfg.machine.training_batches, num_workers=self.cfg.machine.workers)
