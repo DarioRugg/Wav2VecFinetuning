@@ -1,6 +1,10 @@
 # @package _group_
 name: Wav2Vec
 epochs: 40
+learning_rate: 3e-5
 
 option: paper # {all, cnn, cnn_avg, partial, cls_token, cls_token_not_pretrained, paper}
 finetuning: yes # {yes, no}
+
+hidden_layers: 0
+hidden_size: null

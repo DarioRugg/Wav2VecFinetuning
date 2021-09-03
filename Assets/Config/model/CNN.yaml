@@ -1,4 +1,6 @@
 # @package _group_
 name: CNN
 epochs: 24
+learning_rate: 3e-5
+
 input_size: [1, 128, 391]

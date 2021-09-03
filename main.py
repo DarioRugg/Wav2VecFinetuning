@@ -6,7 +6,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from scripts.lightning_dataloaders import DataModule
 
-from scripts.utils import get_model, get_model_from_checkpoint
+from scripts.utils import get_model, get_model_from_checkpoint, get_defaults_hyperparameters, update_sweep_configs
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import Trainer
 
@@ -15,7 +15,7 @@ from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning import seed_everything
 
 import logging
-logger = logging.getLogger("__name__")
+logger = logging.getLogger("config_logger")
 
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
@@ -29,8 +29,10 @@ def main(cfg: DictConfig):
 
     seed_everything(0)
 
-    wandb.init(project="speaker_split")
+    wandb.init(project="speaker_split", config=get_defaults_hyperparameters(cfg))
     wandb_logger = WandbLogger(project=cfg.simulation_name)
+
+    update_sweep_configs(hydra_cfg=cfg, sweep_cfg=wandb.config)
 
     # ------------------> Dataset <-----------------------
     data_module = DataModule(config=cfg)

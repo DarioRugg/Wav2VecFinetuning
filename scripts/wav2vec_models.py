@@ -1,5 +1,6 @@
 from typing import Optional, Callable
 import itertools
+from collections import OrderedDict
 
 import torch
 from torch import nn
@@ -55,7 +56,7 @@ class Wav2VecBase(pl.LightningModule):
 
 class Wav2VecCLSPaperFinetuning(Wav2VecBase):
 
-    def __init__(self, num_classes, learning_rate, num_epochs):
+    def __init__(self, num_classes, learning_rate, num_epochs, hidden_layers=0, hidden_size=None):
         super(Wav2VecCLSPaperFinetuning, self).__init__(num_classes)
 
         self.lr = learning_rate
@@ -69,21 +70,33 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
             param.requires_grad = False
 
         # then we add on top the classification layer to be trained
-        self.linear_layer = torch.nn.Linear(self.pretrained_model.config.hidden_size, num_classes)
+        if hidden_layers == 0:
+            self.classifier = torch.nn.Linear(self.pretrained_model.config.hidden_size, num_classes)
+        else:
+
+            self.classifier = torch.nn.Sequential(OrderedDict([
+                ("input_layer", torch.nn.Linear(self.pretrained_model.config.hidden_size, hidden_size)),
+                ("input_activation", torch.nn.ReLU())
+            ]))
+            for i in range(hidden_layers-1):
+                self.classifier.add_module(f"hidden_{i+1}", torch.nn.Linear(hidden_size, hidden_size))
+                self.classifier.add_module(f"activation_{i+1}", torch.nn.ReLU())
+
+            self.classifier.add_module(f"output_layer", torch.nn.Linear(hidden_size, num_classes))
 
     def forward(self, x):
         cls_token, _ = self.pretrained_model(x)
 
-        y_pred = self.linear_layer(cls_token)
+        y_pred = self.classifier(cls_token)
         return y_pred
 
     # here we must define the optimizer and the different learning rate
     def configure_optimizers(self):
-        optimizer_linear_layer = torch.optim.Adam(params=self.linear_layer.parameters(), lr=self.lr)
+        optimizer_linear_layer = torch.optim.Adam(params=self.classifier.parameters(), lr=self.lr)
 
         params = [self.pretrained_model.feature_projection.parameters(),
                   self.pretrained_model.encoder.parameters(),
-                  self.linear_layer.parameters()]
+                  self.classifier.parameters()]
         optimizer_linear_and_encoder = torch.optim.Adam(
             # params=itertools.chain(*params),
             params=itertools.chain(*params),
