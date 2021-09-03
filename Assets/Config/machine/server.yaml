@@ -1,5 +1,5 @@
 # @package _group_
 workers: 24
-training_batches: 32
-testing_batches: 64
+training_batches: 16
+testing_batches: 16
 gpu: 0
