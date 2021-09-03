@@ -32,3 +32,6 @@ parameters:
       - 8
       - 16
       - 32
+
+command:
+  - ${args_no_hyphens}
