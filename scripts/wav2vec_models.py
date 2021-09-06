@@ -54,7 +54,7 @@ class Wav2VecBase(pl.LightningModule):
 class Wav2VecCLSPaperFinetuning(Wav2VecBase):
 
     def __init__(self, num_classes, learning_rate, num_epochs, hidden_layers=0, hidden_size=None):
-        super(Wav2VecCLSPaperFinetuning, self).__init__(num_classes)
+        super(Wav2VecCLSPaperFinetuning, self).__init__()
 
         self.lr = learning_rate
         self.num_epochs = num_epochs
@@ -137,7 +137,7 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
 
 class Wav2VecFeatureExtractor(Wav2VecBase):
     def __init__(self, num_classes, pretrained_out_dim=(512, 226), finetune_pretrained=True):
-        super(Wav2VecFeatureExtractor, self).__init__(num_classes=num_classes)
+        super(Wav2VecFeatureExtractor, self).__init__()
         self.finetune_pretrained = finetune_pretrained
 
         # First we take the pretrained xlsr model
@@ -168,7 +168,7 @@ class Wav2VecFeatureExtractor(Wav2VecBase):
 
 class Wav2VecFeatureExtractorGAP(Wav2VecBase):
     def __init__(self, num_classes, finetune_pretrained=True):
-        super(Wav2VecFeatureExtractorGAP, self).__init__(num_classes=num_classes)
+        super(Wav2VecFeatureExtractorGAP, self).__init__()
         self.finetune_pretrained = finetune_pretrained
 
         # First we take the pretrained xlsr model
@@ -202,7 +202,7 @@ class Wav2VecFeatureExtractorGAP(Wav2VecBase):
 class Wav2VecCLSToken(Wav2VecBase):
 
     def __init__(self, num_classes):
-        super(Wav2VecCLSToken, self).__init__(num_classes)
+        super(Wav2VecCLSToken, self).__init__()
 
         # We replace the pretrained model with the one with the CLS token
         self.pretrained_model = Wav2VecModelOverridden.from_pretrained("facebook/wav2vec2-large-xlsr-53")
@@ -234,7 +234,7 @@ class Wav2VecCLSToken(Wav2VecBase):
 class Wav2VecCLSTokenNotPretrained(Wav2VecBase):
 
     def __init__(self, num_classes):
-        super(Wav2VecCLSTokenNotPretrained, self).__init__(num_classes)
+        super(Wav2VecCLSTokenNotPretrained, self).__init__()
 
         # getting the config for constructing the model randomly initialized
         model_config = Wav2Vec2Config("facebook/wav2vec2-large-xlsr-53")
