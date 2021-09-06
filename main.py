@@ -15,14 +15,14 @@ from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning import seed_everything
 
 import logging
+
 logger = logging.getLogger("config_logger")
 
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
+
 @hydra.main(config_path=Path(".", "Assets", "Config"), config_name="config.yaml")
 def main(cfg: DictConfig):
-
-    logger.info(OmegaConf.to_yaml(cfg))
     # if it's just an home test we run in offline mode
     if cfg.simulation_name == "home_test":
         os.environ["WANDB_MODE"] = "offline"
@@ -33,6 +33,7 @@ def main(cfg: DictConfig):
     wandb_logger = WandbLogger(project=cfg.simulation_name)
 
     update_sweep_configs(hydra_cfg=cfg, sweep_cfg=wandb.config)
+    logger.info(OmegaConf.to_yaml(cfg))
 
     # ------------------> Dataset <-----------------------
     data_module = DataModule(config=cfg)

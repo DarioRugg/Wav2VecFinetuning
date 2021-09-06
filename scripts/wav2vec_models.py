@@ -13,9 +13,6 @@ from scripts.models.wav2vec2_modified import Wav2VecModelOverridden
 
 
 class Wav2VecBase(pl.LightningModule):
-    def __init__(self, num_classes):
-        super(Wav2VecBase, self).__init__()
-
     def training_step(self, batch, batch_idx, optimizer_idx):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
@@ -24,7 +21,7 @@ class Wav2VecBase(pl.LightningModule):
         self.log('train_loss', loss, on_step=True)
         y_hat = torch.argmax(y_hat, dim=1)
         acc = accuracy(y_hat, y)
-        self.log('val_acc', acc, on_step=True)
+        self.log('train_acc', acc, on_step=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -39,7 +36,7 @@ class Wav2VecBase(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
-        # training_step defined the train loop. It is independent of forward
+        # test_step defined the test loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
         loss = cross_entropy(y_hat, y)
