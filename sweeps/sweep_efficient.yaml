@@ -1,4 +1,5 @@
 # wandb sweep hyper-parameters
+project: "EfficientNet_tuning"
 
 # file to run
 program: main.py
@@ -36,4 +37,4 @@ command:
   - ${env}
   - python3
   - ${program}
-  - simulation_name="wav2vec sweep EfficientNet" model=EfficientNet
+  - simulation_name="EfficientNet sweep" model=EfficientNet

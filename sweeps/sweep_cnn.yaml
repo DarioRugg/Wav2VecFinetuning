@@ -1,4 +1,5 @@
 # wandb sweep hyper-parameters
+project: "CNN_tuning"
 
 # file to run
 program: main.py
@@ -33,4 +34,4 @@ command:
   - ${env}
   - python3
   - ${program}
-  - simulation_name="wav2vec sweep cnn" model=CNN
+  - simulation_name="CNN sweep" model=CNN

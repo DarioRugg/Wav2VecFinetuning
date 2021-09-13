@@ -1,4 +1,5 @@
 # wandb sweep hyper-parameters
+project: "Wav2Vec_tuning"
 
 # file to run
 program: main.py
@@ -42,4 +43,4 @@ command:
   - ${env}
   - python3
   - ${program}
-  - simulation_name="wav2vec sweep"
+  - simulation_name="Wav2Vec sweep"
