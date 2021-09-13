@@ -29,7 +29,7 @@ def main(cfg: DictConfig):
 
     seed_everything(0)
 
-    wandb.init(project="speaker_split", config=get_defaults_hyperparameters(cfg))
+    wandb.init(project=cfg.simulation_name, config=get_defaults_hyperparameters(cfg))
     wandb_logger = WandbLogger(project=cfg.simulation_name)
 
     update_sweep_configs(hydra_cfg=cfg, sweep_cfg=wandb.config)
