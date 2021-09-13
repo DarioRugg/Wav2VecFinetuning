@@ -37,4 +37,5 @@ command:
   - ${env}
   - python3
   - ${program}
-  - simulation_name="EfficientNet sweep" model="EfficientNet"
+  - simulation_name="EfficientNet sweep"
+  - model="EfficientNet"
