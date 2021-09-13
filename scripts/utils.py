@@ -4,26 +4,37 @@ from scripts.wav2vec_models import Wav2VecComplete, Wav2VecFeatureExtractorGAP, 
 
 
 def get_defaults_hyperparameters(hydra_cfg):
-    return dict(
-        training_batches=hydra_cfg.machine.training_batches,
-        epochs=hydra_cfg.model.epochs,
-        learning_rate=hydra_cfg.model.learning_rate,
-        classifier_hidden_layers=hydra_cfg.model.hidden_layers,
-        classifier_hidden_size=hydra_cfg.model.hidden_size
+    sweep_cfg = dict(
+       training_batches=hydra_cfg.machine.training_batches,
+       epochs=hydra_cfg.model.epochs,
+       learning_rate=hydra_cfg.model.learning_rate
     )
 
+    # for wav2vec
+    if "hidden_layers" in hydra_cfg.model.keys(): sweep_cfg["classifier_hidden_layers"] = hydra_cfg.model.hidden_layers
+    if "hidden_size" in hydra_cfg.model.keys(): sweep_cfg["classifier_hidden_size"] = hydra_cfg.model.hidden_size
+
+    # for efficientnet
+    if "blocks" in hydra_cfg.model.keys(): sweep_cfg["blocks"] = hydra_cfg.model.blocks
+
+    return sweep_cfg
 
 def update_sweep_configs(hydra_cfg, sweep_cfg):
     hydra_cfg.machine.training_batches = sweep_cfg["training_batches"]
     hydra_cfg.model.epochs = sweep_cfg["epochs"]
     hydra_cfg.model.learning_rate = sweep_cfg["learning_rate"]
-    hydra_cfg.model.hidden_layers = sweep_cfg["classifier_hidden_layers"]
-    hydra_cfg.model.hidden_size = sweep_cfg["classifier_hidden_size"]
 
+    # for wav2vec
+    if "hidden_layers" in hydra_cfg.model.keys(): hydra_cfg.model.hidden_layers = sweep_cfg["classifier_hidden_layers"]
+    if "hidden_size" in hydra_cfg.model.keys(): hydra_cfg.model.hidden_size = sweep_cfg["classifier_hidden_size"]
+
+    # for efficientnet
+    if "blocks" in hydra_cfg.model.keys(): hydra_cfg.model.blocks = sweep_cfg["blocks"]
 
 def get_model(cfg):
     if cfg.model.name.lower() == "cnn":
-        return SpectrogramCNN(input_size=cfg.model.input_size, class_number=cfg.dataset.number_of_classes)
+        return SpectrogramCNN(input_size=cfg.model.input_size, class_number=cfg.dataset.number_of_classes,
+                              learning_rate=cfg.model.learning_rate)
     elif cfg.model.name.lower() == "efficientnet":
         return EfficientNetModel(num_classes=cfg.dataset.number_of_classes, blocks=cfg.model.blocks,
                                  learning_rate=cfg.model.learning_rate)
@@ -53,7 +64,8 @@ def get_model(cfg):
 def get_model_from_checkpoint(cfg, checkpoint_path):
     if cfg.model.name.lower() == "cnn":
         return SpectrogramCNN.load_from_checkpoint(checkpoint_path, input_size=cfg.model.input_size,
-                                                   class_number=cfg.dataset.number_of_classes)
+                                                   class_number=cfg.dataset.number_of_classes,
+                                                   learning_rate=cfg.model.learning_rate)
     elif cfg.model.name.lower() == "efficientnet":
         return EfficientNetModel.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes,
                                                       blocks=cfg.model.blocks, learning_rate=cfg.model.learning_rate)

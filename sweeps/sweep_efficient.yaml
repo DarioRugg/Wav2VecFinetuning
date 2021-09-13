@@ -1,0 +1,39 @@
+# wandb sweep hyper-parameters
+
+# file to run
+program: main.py
+
+# param search algo
+method: bayes
+metric:
+  name: val_loss  # label of the logged loss with wandb during validation_step
+  goal: minimize
+
+# parameters:
+parameters:
+  training_batches:
+    values:
+      - 2
+      - 4
+      - 8
+      - 12
+  epochs:
+    min: 20
+    max: 40
+  learning_rate:
+    min: 5e-4
+    max: 5e-3
+  blocks:
+    min: 1
+    max: 7
+
+early_terminate:
+  type: hyperband
+  max_iter: 15
+  s: 2
+
+command:
+  - ${env}
+  - python3
+  - ${program}
+  - simulation_name="wav2vec sweep EfficientNet" model=EfficientNet
