@@ -75,7 +75,7 @@ class SpectrogramCNN(BaseLightningModel):
             if i % 2 == 0:
                 self.cnn_layers.add_module(f"dropout_{i + 1}", torch.nn.Dropout(p=drop_out_prob))
 
-        self.cnn_layers.add_module(f"last_hidden_layer", torch.nn.Conv2d(in_channels=cnn_filters*2, out_channels=cnn_filters*2, kernel_size=3, stride=2))
+        self.cnn_layers.add_module(f"last_hidden_layer", torch.nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters*2, kernel_size=3, stride=2))
         self.cnn_layers.add_module(f"last_hidden_activation", torch.nn.ReLU())
         self.cnn_layers.add_module(f"last_hidden_dropout", torch.nn.Dropout(p=drop_out_prob))
 

@@ -9,4 +9,4 @@ classifier_hidden_layers: 2
 classifier_hidden_size: 16
 drop_out_prob: 0.03
 
-input_size: [1, 128, 391]
+# input_size: [1, 128, 391]
