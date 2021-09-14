@@ -3,4 +3,10 @@ name: CNN
 epochs: 24
 learning_rate: 3e-5
 
+cnn_hidden_layers: 4
+cnn_filters: 64
+classifier_hidden_layers: 2
+classifier_hidden_size: 16
+drop_out_prob: 0.03
+
 input_size: [1, 128, 391]

@@ -17,6 +17,13 @@ def get_defaults_hyperparameters(hydra_cfg):
     # for efficientnet
     if "blocks" in hydra_cfg.model.keys(): sweep_cfg["blocks"] = hydra_cfg.model.blocks
 
+    # for cnn
+    if "cnn_hidden_layers" in hydra_cfg.model.keys(): sweep_cfg["cnn_hidden_layers"] = hydra_cfg.model.cnn_hidden_layers
+    if "cnn_filters" in hydra_cfg.model.keys(): sweep_cfg["cnn_filters"] = hydra_cfg.model.cnn_filters
+    if "classifier_hidden_layers" in hydra_cfg.model.keys(): sweep_cfg["classifier_hidden_layers"] = hydra_cfg.model.classifier_hidden_layers
+    if "classifier_hidden_size" in hydra_cfg.model.keys(): sweep_cfg["classifier_hidden_size"] = hydra_cfg.model.classifier_hidden_size
+    if "drop_out_prob" in hydra_cfg.model.keys(): sweep_cfg["drop_out_prob"] = hydra_cfg.model.drop_out_prob
+
     return sweep_cfg
 
 def update_sweep_configs(hydra_cfg, sweep_cfg):
@@ -31,10 +38,21 @@ def update_sweep_configs(hydra_cfg, sweep_cfg):
     # for efficientnet
     if "blocks" in hydra_cfg.model.keys(): hydra_cfg.model.blocks = sweep_cfg["blocks"]
 
+    # for cnn
+    if "cnn_hidden_layers" in hydra_cfg.model.keys(): hydra_cfg.model.cnn_hidden_layers = sweep_cfg["cnn_hidden_layers"]
+    if "cnn_filters" in hydra_cfg.model.keys(): hydra_cfg.model.cnn_filters = sweep_cfg["cnn_filters"]
+    if "classifier_hidden_layers" in hydra_cfg.model.keys(): hydra_cfg.model.classifier_hidden_layers = sweep_cfg["classifier_hidden_layers"]
+    if "classifier_hidden_size" in hydra_cfg.model.keys(): hydra_cfg.model.classifier_hidden_size = sweep_cfg["classifier_hidden_size"]
+    if "drop_out_prob" in hydra_cfg.model.keys(): hydra_cfg.model.drop_out_prob = sweep_cfg["drop_out_prob"]
+
 def get_model(cfg):
     if cfg.model.name.lower() == "cnn":
         return SpectrogramCNN(input_size=cfg.model.input_size, class_number=cfg.dataset.number_of_classes,
-                              learning_rate=cfg.model.learning_rate)
+                              learning_rate=cfg.model.learning_rate,
+                              cnn_hidden_layers=cfg.model.cnn_hidden_layers, cnn_filters=cfg.model.cnn_filters,
+                              classifier_hidden_layers=cfg.model.classifier_hidden_layers,
+                              classifier_hidden_size=cfg.model.classifier_hidden_size,
+                              drop_out_prob=cfg.model.drop_out_prob)
     elif cfg.model.name.lower() == "efficientnet":
         return EfficientNetModel(num_classes=cfg.dataset.number_of_classes, blocks=cfg.model.blocks,
                                  learning_rate=cfg.model.learning_rate)
@@ -65,7 +83,12 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
     if cfg.model.name.lower() == "cnn":
         return SpectrogramCNN.load_from_checkpoint(checkpoint_path, input_size=cfg.model.input_size,
                                                    class_number=cfg.dataset.number_of_classes,
-                                                   learning_rate=cfg.model.learning_rate)
+                                                   learning_rate=cfg.model.learning_rate,
+                                                   cnn_hidden_layers=cfg.model.cnn_hidden_layers,
+                                                   cnn_filters=cfg.model.cnn_filters,
+                                                   classifier_hidden_layers=cfg.model.classifier_hidden_layers,
+                                                   classifier_hidden_size=cfg.model.classifier_hidden_size,
+                                                   drop_out_prob=cfg.model.drop_out_prob)
     elif cfg.model.name.lower() == "efficientnet":
         return EfficientNetModel.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes,
                                                       blocks=cfg.model.blocks, learning_rate=cfg.model.learning_rate)

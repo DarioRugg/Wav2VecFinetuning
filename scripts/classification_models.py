@@ -5,6 +5,8 @@ from pytorch_lightning.metrics.functional import accuracy
 import pytorch_lightning as pl
 from efficientnet_pytorch import EfficientNet
 
+from collections import OrderedDict
+
 
 class BaseLightningModel(pl.LightningModule):
     def __init__(self, learning_rate):
@@ -20,7 +22,7 @@ class BaseLightningModel(pl.LightningModule):
         self.log('train_loss', loss, on_step=True)
         y_hat = torch.argmax(y_hat, dim=1)
         acc = accuracy(y_hat, y)
-        self.log('train_acc', acc, on_step=True)
+        self.log('train_acc', acc, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -55,29 +57,30 @@ class BaseLightningModel(pl.LightningModule):
 
 
 class SpectrogramCNN(BaseLightningModel):
-    def __init__(self, input_size, class_number, learning_rate):
+    def __init__(self, input_size, class_number, learning_rate,
+                 cnn_hidden_layers=4, cnn_filters=64,
+                 classifier_hidden_layers=2, classifier_hidden_size=16,
+                 drop_out_prob=0.03):
+
         super(SpectrogramCNN, self).__init__(learning_rate)
 
-        self.cnn_layers = torch.nn.Sequential(
-            torch.nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
+        self.cnn_layers = torch.nn.Sequential(OrderedDict([
+            ("input_layer", torch.nn.Conv2d(in_channels=1, out_channels=cnn_filters, kernel_size=3, stride=2)),
+            ("input_activation", torch.nn.ReLU())
+        ]))
+        for i in range(cnn_hidden_layers):
+            self.cnn_layers.add_module(f"hidden_{i + 1}",
+                                       torch.nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3, stride=2))
+            self.cnn_layers.add_module(f"activation_{i + 1}", torch.nn.ReLU())
+            if i % 2 == 0:
+                self.cnn_layers.add_module(f"dropout_{i + 1}", torch.nn.Dropout(p=drop_out_prob))
 
-            torch.nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3),
-            torch.nn.ReLU(),
+        self.cnn_layers.add_module(f"last_hidden_layer", torch.nn.Conv2d(in_channels=cnn_filters*2, out_channels=cnn_filters*2, kernel_size=3, stride=2))
+        self.cnn_layers.add_module(f"last_hidden_activation", torch.nn.ReLU())
+        self.cnn_layers.add_module(f"last_hidden_dropout", torch.nn.Dropout(p=drop_out_prob))
 
-            torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-
-            torch.nn.MaxPool2d(kernel_size=2),
-
-            torch.nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3),
-            torch.nn.ReLU(),
-
-            torch.nn.MaxPool2d(kernel_size=2),
-
-            torch.nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-        )
+        self.cnn_layers.add_module(f"output_layer", torch.nn.Conv2d(in_channels=cnn_filters*2, out_channels=cnn_filters*2, kernel_size=3, stride=2))
+        self.cnn_layers.add_module(f"output_activation", torch.nn.ReLU())
 
         def _get_size_after_flattening(in_size, convolutions):
             f = convolutions(torch.autograd.Variable(torch.ones(1, *in_size)))
@@ -85,20 +88,22 @@ class SpectrogramCNN(BaseLightningModel):
 
         linear_layer_input_size = _get_size_after_flattening(in_size=input_size, convolutions=self.cnn_layers)
 
-        self.linear_layers = torch.nn.Sequential(
-            torch.nn.Linear(linear_layer_input_size, 120),
-            torch.nn.ReLU(),
+        self.classifier = torch.nn.Sequential(OrderedDict([
+            ("input_layer", torch.nn.Linear(linear_layer_input_size, classifier_hidden_size)),
+            ("input_activation", torch.nn.ReLU())
+        ]))
+        for i in range(classifier_hidden_layers):
+            self.classifier.add_module(f"hidden_{i + 1}", torch.nn.Linear(classifier_hidden_size, classifier_hidden_size))
+            self.classifier.add_module(f"activation_{i + 1}", torch.nn.ReLU())
+            if i % 2 == 0:
+                self.cnn_layers.add_module(f"dropout_{i + 1}", torch.nn.Dropout(p=drop_out_prob))
 
-            torch.nn.Linear(120, 84),
-            torch.nn.ReLU(),
-
-            torch.nn.Linear(84, class_number)
-        )
+        self.classifier.add_module(f"output_layer", torch.nn.Linear(classifier_hidden_size, class_number))
 
         self.model = torch.nn.Sequential(
             self.cnn_layers,
             torch.nn.Flatten(),
-            self.linear_layers
+            self.classifier
         )
 
 
