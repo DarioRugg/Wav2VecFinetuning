@@ -13,7 +13,7 @@ from scripts.models.wav2vec2_modified import Wav2VecModelOverridden
 
 
 class Wav2VecBase(pl.LightningModule):
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
