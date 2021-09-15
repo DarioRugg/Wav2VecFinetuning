@@ -66,7 +66,10 @@ def get_model(cfg):
                                            finetune_pretrained=cfg.model.finetuning)
         elif cfg.model.option == "cnn_avg":
             return Wav2VecFeatureExtractorGAP(num_classes=cfg.dataset.number_of_classes,
-                                              finetune_pretrained=cfg.model.finetuning)
+                                              finetune_pretrained=cfg.model.finetuning,
+                                              cnn_hidden_layers=cfg.model.cnn_hidden_layers,
+                                              cnn_filters=cfg.model.cnn_filters,
+                                              drop_out_prob=cfg.model.drop_out_prob)
         elif cfg.model.option == "cls_token":
             return Wav2VecCLSToken(num_classes=cfg.dataset.number_of_classes)
         elif cfg.model.option == "cls_token_not_pretrained":
@@ -106,7 +109,10 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
         elif cfg.model.option == "cnn_avg":
             return Wav2VecFeatureExtractorGAP.load_from_checkpoint(checkpoint_path,
                                                                    num_classes=cfg.dataset.number_of_classes,
-                                                                   finetune_pretrained=cfg.model.finetuning)
+                                                                   finetune_pretrained=cfg.model.finetuning,
+                                                                   cnn_hidden_layers=cfg.model.cnn_hidden_layers,
+                                                                   cnn_filters=cfg.model.cnn_filters,
+                                                                   drop_out_prob=cfg.model.drop_out_prob)
         elif cfg.model.option == "cls_token":
             return Wav2VecCLSToken.load_from_checkpoint(checkpoint_path, num_classes=cfg.dataset.number_of_classes)
         elif cfg.model.option == "cls_token_not_pretrained":

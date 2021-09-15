@@ -18,10 +18,10 @@ class Wav2VecBase(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = cross_entropy(y_hat, y)
-        self.log('train_loss', loss, on_step=True)
+        self.log('train_loss', loss, on_step=False, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
         acc = accuracy(y_hat, y)
-        self.log('train_acc', acc, on_step=True)
+        self.log('train_acc', acc, on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -75,9 +75,9 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
                 ("input_layer", torch.nn.Linear(self.pretrained_model.config.hidden_size, hidden_size)),
                 ("input_activation", torch.nn.ReLU())
             ]))
-            for i in range(hidden_layers-1):
-                self.classifier.add_module(f"hidden_{i+1}", torch.nn.Linear(hidden_size, hidden_size))
-                self.classifier.add_module(f"activation_{i+1}", torch.nn.ReLU())
+            for i in range(hidden_layers - 1):
+                self.classifier.add_module(f"hidden_{i + 1}", torch.nn.Linear(hidden_size, hidden_size))
+                self.classifier.add_module(f"activation_{i + 1}", torch.nn.ReLU())
 
             self.classifier.add_module(f"output_layer", torch.nn.Linear(hidden_size, num_classes))
 
@@ -167,7 +167,7 @@ class Wav2VecFeatureExtractor(Wav2VecBase):
 
 
 class Wav2VecFeatureExtractorGAP(Wav2VecBase):
-    def __init__(self, num_classes, finetune_pretrained=True):
+    def __init__(self, num_classes, finetune_pretrained=True, cnn_hidden_layers=2, cnn_filters=16, drop_out_prob=0.05):
         super(Wav2VecFeatureExtractorGAP, self).__init__()
         self.finetune_pretrained = finetune_pretrained
 
@@ -180,12 +180,22 @@ class Wav2VecFeatureExtractorGAP(Wav2VecBase):
         for name, param in self.pretrained_model.named_parameters():
             param.requires_grad = self.finetune_pretrained
 
-        self.cls_net = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3),
-            nn.Sigmoid(),
-            nn.Conv2d(in_channels=64, out_channels=num_classes, kernel_size=3),
-            nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        )
+        self.cnn_layers = nn.Sequential(OrderedDict([
+            ("input_layer", nn.Conv2d(in_channels=1, out_channels=cnn_filters, kernel_size=3, stride=2)),
+            ("input_activation", nn.ReLU())
+        ]))
+        for i in range(cnn_hidden_layers):
+            self.cnn_layers.add_module(f"hidden_{i + 1}",
+                                       nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3,
+                                                 stride=2))
+            self.cnn_layers.add_module(f"activation_{i + 1}", nn.ReLU())
+            if i % 2 == 0:
+                self.cnn_layers.add_module(f"dropout_{i + 1}", nn.Dropout(p=drop_out_prob))
+
+        self.cnn_layers.add_module("output_layer",
+                                   nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters * 2, kernel_size=3,
+                                             stride=2))
+        self.cnn_layers.add_module("global_average_pooling", nn.AdaptiveAvgPool2d(output_size=(1, 1)))
 
     def forward(self, x):
         with torch.enable_grad() if self.finetune_pretrained else torch.no_grad():

@@ -19,10 +19,10 @@ class BaseLightningModel(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = cross_entropy(y_hat, y)
-        self.log('train_loss', loss, on_step=True)
+        self.log('train_loss', loss, on_step=False, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
         acc = accuracy(y_hat, y)
-        self.log('train_acc', acc, on_epoch=True)
+        self.log('train_acc', acc, on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
