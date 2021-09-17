@@ -20,19 +20,19 @@ parameters:
       - 12
       - 20
   epochs:
-    min: 40
-    max: 100
+    min: 25
+    max: 40
   learning_rate:
-    min: 0.000005
-    max: 0.00008
+    min: 0.0001
+    max: 0.008
   cnn_hidden_layers:
     min: 0
     max: 3
   cnn_filters:
     values:
       - 16
+      - 20
       - 24
-      - 32
   drop_out_prob:
     min: 0.00
     max: 0.08

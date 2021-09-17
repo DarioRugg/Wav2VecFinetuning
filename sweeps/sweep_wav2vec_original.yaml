@@ -1,5 +1,5 @@
 # wandb sweep hyper-parameters
-project: "Wav2Vec_tuning"
+project: "Wav2Vec_complete_model_tuning"
 
 # file to run
 program: main.py
@@ -20,19 +20,10 @@ parameters:
       - 12
   epochs:
     min: 40
-    max: 100
+    max: 80
   learning_rate:
     min: 0.00001
     max: 0.00008
-  # for wav2vec paper fine-tuning only (for now)
-  classifier_hidden_layers:
-    min: 0
-    max: 5
-  classifier_hidden_size:
-    values:
-      - 8
-      - 16
-      - 32
 
 early_terminate:
   type: hyperband
@@ -43,4 +34,6 @@ command:
   - ${env}
   - python3
   - ${program}
-  - simulation_name="Wav2Vec sweep"
+  - simulation_name="Wav2Vec complete sweep"
+  - model=Wav2Vec
+  - model.option=all

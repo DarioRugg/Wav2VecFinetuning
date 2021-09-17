@@ -45,7 +45,7 @@ def main(cfg: DictConfig):
         monitor='val_loss',
         dirpath='./models',
         filename='checkpoint-model-{epoch:02d}-{val_loss:.2f}',
-        save_top_k=3,
+        save_top_k=1,
         mode='min',
         save_weights_only=False
     )
