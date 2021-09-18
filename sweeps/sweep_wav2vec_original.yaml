@@ -16,14 +16,14 @@ parameters:
     values:
       - 2
       - 4
+      - 6
       - 8
-      - 12
   epochs:
-    min: 40
-    max: 80
+    min: 30
+    max: 50
   learning_rate:
-    min: 0.00001
-    max: 0.00008
+    min: 0.000008
+    max: 0.0005
 
 early_terminate:
   type: hyperband

@@ -138,6 +138,9 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
             # update params
             optimizer.step(closure=optimizer_closure)
 
+    def training_step(self, batch, batch_idx, optimizer_idx):
+        super(Wav2VecCLSPaperFinetuning, self).training_step(batch, batch_idx)
+
 
 class Wav2VecFeatureExtractor(Wav2VecBase):
     def __init__(self, num_classes, learning_rate, pretrained_out_dim=(512, 226), finetune_pretrained=True):

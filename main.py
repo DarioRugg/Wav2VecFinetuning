@@ -7,7 +7,7 @@ from omegaconf import DictConfig, OmegaConf
 from scripts.lightning_dataloaders import DataModule
 
 from scripts.utils import get_model, get_model_from_checkpoint, get_defaults_hyperparameters, update_sweep_configs
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning import Trainer
 
 import wandb
@@ -49,11 +49,14 @@ def main(cfg: DictConfig):
         mode='min',
         save_weights_only=False
     )
+
+    early_stopping_callback = EarlyStopping(monitor="val_loss")
+
     trainer = Trainer(
         fast_dev_run=cfg.unit_test,
         logger=wandb_logger,  # W&B integration
         max_epochs=cfg.model.epochs,  # number of epochs
-        callbacks=[checkpoint_callback],
+        callbacks=[checkpoint_callback, early_stopping_callback],
         gpus=[cfg.machine.gpu] if cfg.machine.gpu is not False else None
     )
 
