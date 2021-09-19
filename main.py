@@ -53,7 +53,7 @@ def main(cfg: DictConfig):
     )
 
     # early stopping
-    early_stopping_callback = EarlyStopping(monitor="val_loss", min_delta=-0.1, patience=5)
+    early_stopping_callback = EarlyStopping(monitor="val_loss", min_delta=-0.05, patience=5)
 
     # logging the best val loss
     min_val_loss_logger = MinLossLogger()
