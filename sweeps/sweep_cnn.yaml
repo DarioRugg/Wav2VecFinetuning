@@ -19,8 +19,8 @@ parameters:
       - 8
       - 12
   epochs:
-    min: 20
-    max: 40
+    min: 40
+    max: 60
   learning_rate:
     min: 5e-4
     max: 5e-3
@@ -34,13 +34,13 @@ parameters:
       - 64
   classifier_hidden_layers:
     min: 1
-    max: 4
+    max: 3
   classifier_hidden_size:
     values:
       - 8
       - 12
       - 16
-      - 24
+      - 20
   drop_out_prob:
     min: 0.00
     max: 0.08
