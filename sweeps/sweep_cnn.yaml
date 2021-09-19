@@ -26,7 +26,7 @@ parameters:
     max: 5e-3
   cnn_hidden_layers:
     min: 1
-    max: 4
+    max: 3
   cnn_filters:
     values:
       - 16

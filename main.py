@@ -53,7 +53,8 @@ def main(cfg: DictConfig):
     )
 
     # early stopping
-    early_stopping_callback = EarlyStopping(monitor="val_loss", min_delta=-0.05, patience=5)
+    early_stopping_callback = EarlyStopping(monitor="val_loss",
+                                            patience=12)
 
     # logging the best val loss
     min_val_loss_logger = MinLossLogger()
@@ -62,7 +63,7 @@ def main(cfg: DictConfig):
         fast_dev_run=cfg.unit_test,
         logger=wandb_logger,  # W&B integration
         max_epochs=cfg.model.epochs,  # number of epochs
-        callbacks=[checkpoint_callback, early_stopping_callback, ],
+        callbacks=[checkpoint_callback, early_stopping_callback, min_val_loss_logger],
         gpus=[cfg.machine.gpu] if cfg.machine.gpu is not False else None
     )
 
