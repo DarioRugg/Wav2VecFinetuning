@@ -11,7 +11,14 @@ from torch.optim import Optimizer
 from transformers import Wav2Vec2Model, Wav2Vec2Config
 from scripts.models.wav2vec2_modified import Wav2VecModelOverridden
 
+from scripts.classification_models import BaseLightningModel
 
+
+class Wav2VecBase(BaseLightningModel):
+    pass
+
+
+"""
 class Wav2VecBase(pl.LightningModule):
     def __init__(self, learning_rate):
         super(Wav2VecBase, self).__init__()
@@ -53,6 +60,7 @@ class Wav2VecBase(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
+"""
 
 
 class Wav2VecCLSPaperFinetuning(Wav2VecBase):
@@ -174,7 +182,8 @@ class Wav2VecFeatureExtractor(Wav2VecBase):
 
 
 class Wav2VecFeatureExtractorGAP(Wav2VecBase):
-    def __init__(self, num_classes, learning_rate, finetune_pretrained=True, cnn_hidden_layers=2, cnn_filters=16, drop_out_prob=0.05):
+    def __init__(self, num_classes, learning_rate, finetune_pretrained=True, cnn_hidden_layers=2, cnn_filters=16,
+                 drop_out_prob=0.05):
         super(Wav2VecFeatureExtractorGAP, self).__init__(learning_rate)
         self.finetune_pretrained = finetune_pretrained
 
@@ -275,7 +284,6 @@ class Wav2VecCLSTokenNotPretrained(Wav2VecBase):
 
 class Wav2VecComplete(Wav2VecBase):
     def __init__(self, num_classes, learning_rate, pretrained_out_dim=1024):
-
         super(Wav2VecComplete, self).__init__(learning_rate)
 
         # First we take the pretrained xlsr model

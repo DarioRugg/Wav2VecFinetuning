@@ -45,7 +45,7 @@ class BaseLightningModel(pl.LightningModule):
         y_hat = torch.argmax(y_hat, dim=1)
         acc = accuracy(y_hat, y)
         self.log('test_acc', acc, on_epoch=True)
-        return loss
+        return {"y": y, "y_hat": y_hat}
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
