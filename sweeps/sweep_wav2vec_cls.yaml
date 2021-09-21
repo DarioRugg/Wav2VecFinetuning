@@ -1,5 +1,5 @@
 # wandb sweep hyper-parameters
-project: "Wav2Vec_tuning"
+project: "Wav2Vec_CLS_tuning"
 
 # file to run
 program: main.py
@@ -7,7 +7,7 @@ program: main.py
 # param search algo
 method: bayes
 metric:
-  name: val_loss  # label of the logged loss with wandb during validation_step
+  name: best_val_loss  # label of the logged loss with wandb during validation_step
   goal: minimize
 
 # parameters:
@@ -16,31 +16,37 @@ parameters:
     values:
       - 2
       - 4
+      - 6
       - 8
+      - 10
       - 12
+      - 14
+      - 16
   epochs:
-    min: 40
-    max: 100
+    min: 50
+    max: 80
   learning_rate:
     min: 0.00001
-    max: 0.00008
-  # for wav2vec paper fine-tuning only (for now)
+    max: 0.00015
   classifier_hidden_layers:
     min: 0
     max: 5
   classifier_hidden_size:
     values:
       - 8
+      - 12
       - 16
+      - 24
       - 32
 
 early_terminate:
   type: hyperband
-  max_iter: 27
-  s: 2
+  min_iter: 3
 
 command:
   - ${env}
   - python3
   - ${program}
   - simulation_name="Wav2Vec sweep"
+  - model=Wav2Vec
+  - model.option=paper

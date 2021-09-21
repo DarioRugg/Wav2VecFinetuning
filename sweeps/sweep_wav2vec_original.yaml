@@ -7,7 +7,7 @@ program: main.py
 # param search algo
 method: bayes
 metric:
-  name: val_loss  # label of the logged loss with wandb during validation_step
+  name: best_val_loss  # label of the logged loss with wandb during validation_step
   goal: minimize
 
 # parameters:
@@ -27,8 +27,7 @@ parameters:
 
 early_terminate:
   type: hyperband
-  max_iter: 27
-  s: 2
+  min_iter: 3
 
 command:
   - ${env}
