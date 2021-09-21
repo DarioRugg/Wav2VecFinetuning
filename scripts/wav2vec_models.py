@@ -63,7 +63,7 @@ class Wav2VecBase(pl.LightningModule):
 """
 
 
-class Wav2VecCLSPaperFinetuning(Wav2VecBase):
+class Wav2VecCLSPaperFinetuning(BaseLightningModel):
 
     def __init__(self, num_classes, learning_rate, num_epochs, hidden_layers=0, hidden_size=None):
         super(Wav2VecCLSPaperFinetuning, self).__init__(learning_rate)
@@ -147,7 +147,7 @@ class Wav2VecCLSPaperFinetuning(Wav2VecBase):
             optimizer.step(closure=optimizer_closure)
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        super(Wav2VecCLSPaperFinetuning, self).training_step(batch, batch_idx)
+        return super(Wav2VecCLSPaperFinetuning, self).training_step(batch, batch_idx)
 
 
 class Wav2VecFeatureExtractor(Wav2VecBase):
