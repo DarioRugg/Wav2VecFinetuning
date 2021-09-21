@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from torch.nn.functional import cross_entropy
-from pytorch_lightning.metrics.functional import accuracy
+from torchmetrics import Accuracy
 import pytorch_lightning as pl
 from efficientnet_pytorch import EfficientNet
 
@@ -21,7 +21,7 @@ class BaseLightningModel(pl.LightningModule):
         loss = cross_entropy(y_hat, y)
         self.log('train_loss', loss, on_step=False, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
-        acc = accuracy(y_hat, y)
+        acc = Accuracy()(y_hat, y)
         self.log('train_acc', acc, on_step=False, on_epoch=True)
         return loss
 
@@ -32,7 +32,7 @@ class BaseLightningModel(pl.LightningModule):
         loss = cross_entropy(y_hat, y)
         self.log('val_loss', loss, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
-        acc = accuracy(y_hat, y)
+        acc = Accuracy()(y_hat, y)
         self.log('val_acc', acc, on_epoch=True)
         return loss
 
@@ -43,7 +43,7 @@ class BaseLightningModel(pl.LightningModule):
         loss = cross_entropy(y_hat, y)
         self.log('test_loss', loss, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
-        acc = accuracy(y_hat, y)
+        acc = Accuracy()(y_hat, y)
         self.log('test_acc', acc, on_epoch=True)
         return {"y": y, "y_hat": y_hat}
 

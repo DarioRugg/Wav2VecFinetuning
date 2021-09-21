@@ -4,63 +4,11 @@ from collections import OrderedDict
 
 import torch
 from torch import nn
-from torch.nn.functional import cross_entropy
-import pytorch_lightning as pl
-from pytorch_lightning.metrics.functional import accuracy
 from torch.optim import Optimizer
 from transformers import Wav2Vec2Model, Wav2Vec2Config
 from scripts.models.wav2vec2_modified import Wav2VecModelOverridden
 
 from scripts.classification_models import BaseLightningModel
-
-
-class Wav2VecBase(BaseLightningModel):
-    pass
-
-
-"""
-class Wav2VecBase(pl.LightningModule):
-    def __init__(self, learning_rate):
-        super(Wav2VecBase, self).__init__()
-        self.learning_rate = learning_rate
-
-    def training_step(self, batch, batch_idx):
-        # training_step defined the train loop. It is independent of forward
-        x, y = batch
-        y_hat = self(x)
-        loss = cross_entropy(y_hat, y)
-        self.log('train_loss', loss, on_step=False, on_epoch=True)
-        y_hat = torch.argmax(y_hat, dim=1)
-        acc = accuracy(y_hat, y)
-        self.log('train_acc', acc, on_step=False, on_epoch=True)
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        # training_step defined the train loop. It is independent of forward
-        x, y = batch
-        y_hat = self(x)
-        loss = cross_entropy(y_hat, y)
-        self.log('val_loss', loss, on_epoch=True)
-        y_hat = torch.argmax(y_hat, dim=1)
-        acc = accuracy(y_hat, y)
-        self.log('val_acc', acc, on_epoch=True)
-        return loss
-
-    def test_step(self, batch, batch_idx):
-        # test_step defined the test loop. It is independent of forward
-        x, y = batch
-        y_hat = self(x)
-        loss = cross_entropy(y_hat, y)
-        self.log('test_loss', loss, on_epoch=True)
-        y_hat = torch.argmax(y_hat, dim=1)
-        acc = accuracy(y_hat, y)
-        self.log('test_acc', acc, on_epoch=True)
-        return loss
-
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
-"""
 
 
 class Wav2VecCLSPaperFinetuning(BaseLightningModel):
@@ -146,11 +94,12 @@ class Wav2VecCLSPaperFinetuning(BaseLightningModel):
             # update params
             optimizer.step(closure=optimizer_closure)
 
+    # override training_step for adding the optimizer_idx parameter.
     def training_step(self, batch, batch_idx, optimizer_idx):
         return super(Wav2VecCLSPaperFinetuning, self).training_step(batch, batch_idx)
 
 
-class Wav2VecFeatureExtractor(Wav2VecBase):
+class Wav2VecFeatureExtractor(BaseLightningModel):
     def __init__(self, num_classes, learning_rate, pretrained_out_dim=(512, 226), finetune_pretrained=True):
         super(Wav2VecFeatureExtractor, self).__init__(learning_rate)
         self.finetune_pretrained = finetune_pretrained
@@ -181,7 +130,7 @@ class Wav2VecFeatureExtractor(Wav2VecBase):
         return y_pred
 
 
-class Wav2VecFeatureExtractorGAP(Wav2VecBase):
+class Wav2VecFeatureExtractorGAP(BaseLightningModel):
     def __init__(self, num_classes, learning_rate, finetune_pretrained=True, cnn_hidden_layers=2, cnn_filters=16,
                  drop_out_prob=0.05):
         super(Wav2VecFeatureExtractorGAP, self).__init__(learning_rate)
@@ -225,7 +174,7 @@ class Wav2VecFeatureExtractorGAP(Wav2VecBase):
         return y_pred
 
 
-class Wav2VecCLSToken(Wav2VecBase):
+class Wav2VecCLSToken(BaseLightningModel):
 
     def __init__(self, num_classes, learning_rate):
         super(Wav2VecCLSToken, self).__init__(learning_rate)
@@ -257,7 +206,7 @@ class Wav2VecCLSToken(Wav2VecBase):
         return y_pred
 
 
-class Wav2VecCLSTokenNotPretrained(Wav2VecBase):
+class Wav2VecCLSTokenNotPretrained(BaseLightningModel):
 
     def __init__(self, num_classes, learning_rate):
         super(Wav2VecCLSTokenNotPretrained, self).__init__(learning_rate)
@@ -282,7 +231,7 @@ class Wav2VecCLSTokenNotPretrained(Wav2VecBase):
         return y_pred
 
 
-class Wav2VecComplete(Wav2VecBase):
+class Wav2VecComplete(BaseLightningModel):
     def __init__(self, num_classes, learning_rate, pretrained_out_dim=1024):
         super(Wav2VecComplete, self).__init__(learning_rate)
 
@@ -305,7 +254,7 @@ class Wav2VecComplete(Wav2VecBase):
         return y_pred
 
 
-class Wav2VecFeezingEncoderOnly(Wav2VecBase):
+class Wav2VecFeezingEncoderOnly(BaseLightningModel):
     def __init__(self, num_classes, learning_rate, pretrained_out_dim=1024):
 
         super(Wav2VecFeezingEncoderOnly, self).__init__(learning_rate)
