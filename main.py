@@ -8,7 +8,7 @@ from scripts.lightning_dataloaders import DataModule
 
 from scripts.utils import get_model, get_model_from_checkpoint, get_defaults_hyperparameters, update_sweep_configs
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from scripts.custom_callbacks import CustomEarlyStopping, MinLossLogger
+from scripts.custom_callbacks import MinLossLogger
 from pytorch_lightning import Trainer
 
 import wandb
@@ -53,7 +53,6 @@ def main(cfg: DictConfig):
     )
 
     # early stopping
-    # early_stopping_callback = CustomEarlyStopping(patience=5, tolerance=0.003)
     early_stopping_callback = EarlyStopping(monitor="val_loss", mode="min", patience=8)
 
     # logging the best val loss

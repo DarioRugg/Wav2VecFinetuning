@@ -28,40 +28,6 @@ class MinLossLogger(Callback):
         trainer.logger.log_metrics({"best_val_loss": self.best_epoch_loss})
 
 
-class CustomEarlyStopping(MinLossLogger):
-    def __init__(self,patience=3, tolerance=0, start_monitoring=0):
-        super(CustomEarlyStopping, self).__init__()
-
-        self.tolerance = tolerance
-        self.patience = patience
-        self.start_monitoring = start_monitoring
-
-        self.waiting = None
-        self.stop = False
-
-    def on_validation_epoch_end(self, trainer, pl_module):
-        super(CustomEarlyStopping, self).on_validation_epoch_end(trainer, pl_module)
-
-        epoch_loss = self.observation_cumulative_batch_loss / self.val_observations
-        if not self.stop and epoch_loss > self.best_epoch_loss + self.tolerance:
-            self.waiting += 1
-            if self.waiting >= self.patience:
-                self.stop = True
-        else:
-            self.waiting = 0
-
-    def on_train_start(self, trainer, pl_module):
-        super(CustomEarlyStopping, self).on_train_start(trainer, pl_module)
-        self.waiting = 0
-        self.stop = False
-
-    def on_train_end(self, trainer, pl_module):
-        pass
-
-    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
-        if self.stop: return -1
-
-
 class ChartsLogger(Callback):
     def __init__(self, classes):
         self.classes = classes
