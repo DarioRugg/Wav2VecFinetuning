@@ -13,6 +13,7 @@ class BaseLightningModel(pl.LightningModule):
         super(BaseLightningModel, self).__init__()
 
         self.lr = learning_rate
+        self.accuracy_calculator = Accuracy()
 
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop. It is independent of forward
@@ -34,12 +35,8 @@ class BaseLightningModel(pl.LightningModule):
         y_hat = self(x)
         loss = cross_entropy(y_hat, y)
         self.log('val_loss', loss, on_epoch=True)
-        print(" v-----------------> before y_hat device: ", y_hat.device, " y device: ", y.device)
-        y_preds = y_hat.to(y.device)
         y_hat = torch.argmax(y_hat, dim=1)
-        print(" v-----------------> after y_hat device: ", y_hat.device, " y device: ", y.device)
-        a = Accuracy().to(y_hat.device)
-        acc = a(y_hat, y)
+        acc = self.accuracy_calculator(y_hat, y)
         self.log('val_acc', acc, on_epoch=True)
         return loss
 
