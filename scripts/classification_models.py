@@ -38,7 +38,7 @@ class BaseLightningModel(pl.LightningModule):
         y_preds = y_hat.to(y.device)
         y_hat = torch.argmax(y_hat, dim=1)
         print(" v-----------------> after y_hat device: ", y_hat.device, " y device: ", y.device)
-        acc = Accuracy()(y_preds, y)
+        acc = Accuracy()(y_hat, y)
         self.log('val_acc', acc, on_epoch=True)
         return loss
 
