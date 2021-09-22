@@ -46,6 +46,7 @@ class BaseLightningModel(pl.LightningModule):
         loss = cross_entropy(y_hat, y)
         self.log('test_loss', loss, on_epoch=True)
         y_preds = y_hat.to("cpu")
+        print(" -----------------> y_preds device: ", y_preds.device)
         y_preds = torch.argmax(y_preds, dim=1)
         acc = Accuracy()(y_preds, y)
         self.log('test_acc', acc, on_epoch=True)
