@@ -18,9 +18,9 @@ class BaseLightningModel(pl.LightningModule):
         # training_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
-        y_hat = y_hat.to("cpu")
         loss = cross_entropy(y_hat, y)
         self.log('train_loss', loss, on_step=False, on_epoch=True)
+        y_hat = y_hat.to("cpu")
         y_hat = torch.argmax(y_hat, dim=1)
         acc = Accuracy()(y_hat, y)
         # acc = Accuracy()(y_hat, y.cuda())
@@ -31,9 +31,9 @@ class BaseLightningModel(pl.LightningModule):
         # validation_step defined the train loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
-        y_hat = y_hat.to("cpu")
         loss = cross_entropy(y_hat, y)
         self.log('val_loss', loss, on_epoch=True)
+        y_hat = y_hat.to("cpu")
         y_hat = torch.argmax(y_hat, dim=1)
         acc = Accuracy()(y_hat, y)
         self.log('val_acc', acc, on_epoch=True)
@@ -43,9 +43,9 @@ class BaseLightningModel(pl.LightningModule):
         # test_step defined the test loop. It is independent of forward
         x, y = batch
         y_hat = self(x)
-        y_hat = y_hat.to("cpu")
         loss = cross_entropy(y_hat, y)
         self.log('test_loss', loss, on_epoch=True)
+        y_hat = y_hat.to("cpu")
         y_hat = torch.argmax(y_hat, dim=1)
         acc = Accuracy()(y_hat, y)
         self.log('test_acc', acc, on_epoch=True)
