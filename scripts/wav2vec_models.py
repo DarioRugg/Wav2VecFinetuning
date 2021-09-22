@@ -13,7 +13,7 @@ from scripts.classification_models import BaseLightningModel
 
 class Wav2VecCLSPaperFinetuning(BaseLightningModel):
 
-    def __init__(self, num_classes, learning_rate, num_epochs, hidden_layers=0, hidden_size=None):
+    def __init__(self, num_classes, learning_rate, num_epochs, hidden_layers=0, hidden_size=None, drop_out_prob=0.03):
         super(Wav2VecCLSPaperFinetuning, self).__init__(learning_rate)
 
         self.lr = learning_rate
@@ -28,18 +28,20 @@ class Wav2VecCLSPaperFinetuning(BaseLightningModel):
 
         # then we add on top the classification layer to be trained
         if hidden_layers == 0:
-            self.classifier = torch.nn.Linear(self.pretrained_model.config.hidden_size, num_classes)
+            self.classifier = nn.Linear(self.pretrained_model.config.hidden_size, num_classes)
         else:
 
-            self.classifier = torch.nn.Sequential(OrderedDict([
-                ("input_layer", torch.nn.Linear(self.pretrained_model.config.hidden_size, hidden_size)),
-                ("input_activation", torch.nn.ReLU())
+            self.classifier = nn.Sequential(OrderedDict([
+                ("input_layer", nn.Linear(self.pretrained_model.config.hidden_size, hidden_size)),
+                ("input_activation", nn.ReLU())
             ]))
             for i in range(hidden_layers - 1):
-                self.classifier.add_module(f"hidden_{i + 1}", torch.nn.Linear(hidden_size, hidden_size))
-                self.classifier.add_module(f"activation_{i + 1}", torch.nn.ReLU())
+                self.classifier.add_module(f"hidden_{i + 1}", nn.Linear(hidden_size, hidden_size))
+                self.classifier.add_module(f"activation_{i + 1}", nn.ReLU())
+                if i % 2 == 0:
+                    self.classifier.add_module(f"dropout_{i + 1}", nn.Dropout(p=drop_out_prob))
 
-            self.classifier.add_module(f"output_layer", torch.nn.Linear(hidden_size, num_classes))
+            self.classifier.add_module(f"output_layer", nn.Linear(hidden_size, num_classes))
 
     def forward(self, x):
         cls_token, _ = self.pretrained_model(x)
@@ -197,7 +199,7 @@ class Wav2VecCLSToken(BaseLightningModel):
 
         pretrained_out_dim = self.pretrained_model.config.hidden_size
         # then we add on top the classification layer to be trained
-        self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
+        self.linear_layer = nn.Linear(pretrained_out_dim, num_classes)
 
     def forward(self, x):
         cls_token, _ = self.pretrained_model(x)
@@ -222,7 +224,7 @@ class Wav2VecCLSTokenNotPretrained(BaseLightningModel):
 
         pretrained_out_dim = self.pretrained_model.config.hidden_size
         # then we add on top the classification layer to be trained
-        self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
+        self.linear_layer = nn.Linear(pretrained_out_dim, num_classes)
 
     def forward(self, x):
         cls_token, _ = self.pretrained_model(x)
@@ -243,7 +245,7 @@ class Wav2VecComplete(BaseLightningModel):
             param.requires_grad = True
 
         # then we add on top the classification layers to be trained
-        self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
+        self.linear_layer = nn.Linear(pretrained_out_dim, num_classes)
 
     def forward(self, x):
         # the audio is divided in chunks depending of it's length,
@@ -271,8 +273,8 @@ class Wav2VecFeezingEncoderOnly(BaseLightningModel):
                 param.requires_grad = False
 
         # then we add on top the classification layers to be trained
-        self.linear_layer = torch.nn.Linear(pretrained_out_dim, num_classes)
-        self.softmax_activation = torch.nn.Softmax(dim=0)
+        self.linear_layer = nn.Linear(pretrained_out_dim, num_classes)
+        self.softmax_activation = nn.Softmax(dim=0)
 
     def forward(self, x):
 

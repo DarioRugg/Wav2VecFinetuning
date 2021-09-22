@@ -91,7 +91,8 @@ def get_model(cfg):
                                              learning_rate=cfg.model.learning_rate,
                                              num_epochs=cfg.model.epochs,
                                              hidden_layers=cfg.model.hidden_layers,
-                                             hidden_size=cfg.model.hidden_size)
+                                             hidden_size=cfg.model.hidden_size,
+                                             drop_out_prob=cfg.model.drop_out_prob)
 
 
 def get_model_from_checkpoint(cfg, checkpoint_path):
@@ -142,6 +143,7 @@ def get_model_from_checkpoint(cfg, checkpoint_path):
                                                                   learning_rate=cfg.model.learning_rate,
                                                                   num_epochs=cfg.model.epochs,
                                                                   hidden_layers=cfg.model.hidden_layers,
-                                                                  hidden_size=cfg.model.hidden_size)
+                                                                  hidden_size=cfg.model.hidden_size,
+                                                                  drop_out_prob=cfg.model.drop_out_prob)
     else:
         raise (cfg.model.name, "not integrated with pytorch lightening yet!")

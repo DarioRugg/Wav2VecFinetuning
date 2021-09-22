@@ -1,4 +1,6 @@
 # @package _global_
+early_stopping_patience: 12
+
 dataset:
   padding_cropping: 72562
   sampling_rate: 16000

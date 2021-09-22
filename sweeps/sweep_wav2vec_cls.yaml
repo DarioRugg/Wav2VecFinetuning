@@ -38,6 +38,9 @@ parameters:
       - 16
       - 24
       - 32
+  drop_out_prob:
+    min: 0.00
+    max: 0.08
 
 early_terminate:
   type: hyperband

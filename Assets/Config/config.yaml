@@ -3,6 +3,8 @@ train: true
 test: false
 unit_test: false # [false, true, int]
 
+early_stopping_patience: 8
+
 defaults:
   - machine: server
   - model: Wav2Vec
