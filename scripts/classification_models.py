@@ -32,7 +32,7 @@ class BaseLightningModel(pl.LightningModule):
         loss = cross_entropy(y_hat, y)
         self.log('val_loss', loss, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
-        acc = Accuracy()(y_hat, y)
+        acc = Accuracy()(y_hat.to("cpu"), y)
         self.log('val_acc', acc, on_epoch=True)
         return loss
 
@@ -43,7 +43,7 @@ class BaseLightningModel(pl.LightningModule):
         loss = cross_entropy(y_hat, y)
         self.log('test_loss', loss, on_epoch=True)
         y_hat = torch.argmax(y_hat, dim=1)
-        acc = Accuracy()(y_hat, y)
+        acc = Accuracy()(y_hat.to("cpu"), y)
         self.log('test_acc', acc, on_epoch=True)
         return {"y": y, "y_hat": y_hat}
 
@@ -53,7 +53,6 @@ class BaseLightningModel(pl.LightningModule):
 
     def forward(self, x):
         return self.model(x)
-
 
 
 class SpectrogramCNN(BaseLightningModel):
