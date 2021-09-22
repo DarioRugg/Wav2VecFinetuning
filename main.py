@@ -8,7 +8,7 @@ from scripts.lightning_dataloaders import DataModule
 
 from scripts.utils import get_model, get_model_from_checkpoint, get_defaults_hyperparameters, update_sweep_configs
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from scripts.custom_callbacks import MinLossLogger
+from scripts.custom_callbacks import MinLossLogger, ChartsLogger
 from pytorch_lightning import Trainer
 
 import wandb
@@ -58,11 +58,13 @@ def main(cfg: DictConfig):
     # logging the best val loss
     min_val_loss_logger = MinLossLogger()
 
+    charts_logger = ChartsLogger(classes=data_module.get_ordered_classes())
+
     trainer = Trainer(
         fast_dev_run=cfg.unit_test,
         logger=wandb_logger,  # W&B integration
         max_epochs=cfg.model.epochs,  # number of epochs
-        callbacks=[checkpoint_callback, early_stopping_callback, min_val_loss_logger],
+        callbacks=[checkpoint_callback, early_stopping_callback, min_val_loss_logger, charts_logger],
         gpus=[cfg.machine.gpu] if cfg.machine.gpu is not False else None
     )
 

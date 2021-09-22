@@ -18,6 +18,9 @@ class DataModule(pl.LightningDataModule):
         super().__init__()
         self.cfg = config
 
+        self.ordered_class_names = None
+
+
         self.train, self.val, self.test = None, None, None
 
     def setup(self, stage=None):
@@ -34,6 +37,9 @@ class DataModule(pl.LightningDataModule):
                                      sampling_rate=self.cfg.dataset.sampling_rate)
         else:
             raise Exception("Requested dataset, doesn't exist yet")
+
+        # fetching the ordered class names of the dataset
+        self.ordered_class_names = dataset.get_ordered_classes()
 
         # ------------------> Split < -----------------------
         if self.cfg.dataset.speaker_split:
@@ -64,3 +70,6 @@ class DataModule(pl.LightningDataModule):
 
     def test_dataloader(self):
         return DataLoader(self.test, batch_size=self.cfg.machine.training_batches, num_workers=self.cfg.machine.workers)
+
+    def get_ordered_classes(self):
+        return self.ordered_class_names

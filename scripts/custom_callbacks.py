@@ -1,5 +1,5 @@
 from pytorch_lightning.callbacks import Callback
-from statistics import mean
+import wandb
 
 
 class MinLossLogger(Callback):
@@ -31,6 +31,10 @@ class MinLossLogger(Callback):
 class ChartsLogger(Callback):
     def __init__(self, classes):
         self.classes = classes
+        self.y = None
+        self.y_hat = None
+
+    def on_test_start(self, trainer, pl_module):
         self.y = []
         self.y_hat = []
 
@@ -38,17 +42,10 @@ class ChartsLogger(Callback):
         self.y += outputs["y"]
         self.y_hat += outputs["y_hat"]
 
-    def on_test_start(self, trainer, pl_module):
-        self.y = []
-        self.y_hat = []
-
-    def on_validation_epoch_end(self, trainer, pl_module):
-        epoch_loss = self.observation_cumulative_batch_loss / self.val_observations
-        self.best_epoch_loss = epoch_loss if self.best_epoch_loss is None else min(self.best_epoch_loss, epoch_loss)
-
-        # since an new epoch start both to 0
-        self.observation_cumulative_batch_loss = 0
-        self.val_observations = 0
-
     def on_test_end(self, trainer, pl_module):
-        trainer.logger.log_metrics({"best_val_loss": self.best_epoch_loss})
+        wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=None,
+                                                           y_true=self.y,
+                                                           preds=self.y_hat,
+                                                           class_names=self.classes)})
+
+        wandb.log({"roc_curve": wandb.plot.roc_curve(self.y, self.y_hat, labels=self.classes)})

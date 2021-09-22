@@ -115,6 +115,7 @@ class DEMoSDataset(BaseDataset):
                             "neu": "Neutral"}
 
         self.classes = sorted(list(classes_dict.keys()))
+        self.ordered_class_names = list(map(lambda item: item[1], sorted(classes_dict.items())))
         self.classes_dict = classes_dict
 
         paths = list(map(lambda fname: fname, sorted(demos_dir.iterdir()))) + list(
@@ -134,6 +135,9 @@ class DEMoSDataset(BaseDataset):
 
     def get_speakers(self):
         return self.speakers
+
+    def get_ordered_classes(self):
+        return self.ordered_class_names
 
 
 """
@@ -168,6 +172,7 @@ class RAVDESSDataset(BaseDataset):
                             7: "surprised"}
 
         self.classes = sorted(list(classes_dict.keys()))
+        self.ordered_class_names = list(map(lambda item: item[1], sorted(classes_dict.items())))
         self.classes_dict = classes_dict
 
         paths = list(itertools.chain.from_iterable(map(lambda actor_path: list(
@@ -188,3 +193,6 @@ class RAVDESSDataset(BaseDataset):
 
     def get_speakers(self):
         return self.speakers
+
+    def get_ordered_classes(self):
+        return self.ordered_class_names
