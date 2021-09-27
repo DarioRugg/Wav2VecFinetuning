@@ -18,12 +18,14 @@ parameters:
       - 4
       - 8
       - 12
+      - 16
+      - 24
   epochs:
     min: 20
     max: 40
   learning_rate:
-    min: 5e-4
-    max: 5e-3
+    min: 3e-4
+    max: 8e-3
   blocks:
     min: 1
     max: 7
