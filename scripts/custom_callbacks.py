@@ -38,7 +38,7 @@ class ChartsLogger(Callback):
 
     def on_test_start(self, trainer, pl_module):
         self.y = np.array([])
-        self.y_hat = np.array([]).reshape((0, len(self.classes)))
+        self.y_hat = np.array([]).reshape((0, 8))
         self.predictions = np.array([])
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
