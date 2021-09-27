@@ -51,6 +51,7 @@ class ChartsLogger(Callback):
         wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=None,
                                                            y_true=self.y,
                                                            preds=self.predictions,
-                                                           class_names=self.classes)})
+                                                           class_names=['Guilt', 'Disgust', 'Happiness', 'Neutral', 'Fear', 'Anger', 'Surprise', 'Sadness'])})
+                                                           # class_names=self.classes)})
 
         wandb.log({"roc_curve": wandb.plot.roc_curve(self.y, self.y_hat, labels=self.classes)})
