@@ -8,6 +8,7 @@ test: true
 
 # best model configuration configuration
 unit_test: false
+early_stopping_patience: 8
 machine:
   workers: 24
   training_batches: 8
