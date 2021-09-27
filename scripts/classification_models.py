@@ -43,10 +43,10 @@ class BaseLightningModel(pl.LightningModule):
         y_hat = self(x)
         loss = cross_entropy(y_hat, y)
         self.log('test_loss', loss, on_epoch=True)
-        y_hat = torch.argmax(y_hat, dim=1)
-        acc = self.accuracy_calculator(y_hat, y)
+        predictions = torch.argmax(y_hat, dim=1)
+        acc = self.accuracy_calculator(predictions, y)
         self.log('test_acc', acc, on_epoch=True)
-        return {"y": y, "y_hat": y_hat}
+        return {"y": y, "y_hat": y_hat, "predictions": predictions}
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
@@ -70,16 +70,21 @@ class SpectrogramCNN(BaseLightningModel):
         ]))
         for i in range(cnn_hidden_layers):
             self.cnn_layers.add_module(f"hidden_{i + 1}",
-                                       torch.nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3, stride=2))
+                                       torch.nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3,
+                                                       stride=2))
             self.cnn_layers.add_module(f"activation_{i + 1}", torch.nn.ReLU())
             if i % 2 == 0:
                 self.cnn_layers.add_module(f"dropout_{i + 1}", torch.nn.Dropout(p=drop_out_prob))
 
-        self.cnn_layers.add_module(f"last_hidden_layer", torch.nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters*2, kernel_size=3, stride=2))
+        self.cnn_layers.add_module(f"last_hidden_layer",
+                                   torch.nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters * 2, kernel_size=3,
+                                                   stride=2))
         self.cnn_layers.add_module(f"last_hidden_activation", torch.nn.ReLU())
         self.cnn_layers.add_module(f"last_hidden_dropout", torch.nn.Dropout(p=drop_out_prob))
 
-        self.cnn_layers.add_module(f"output_layer", torch.nn.Conv2d(in_channels=cnn_filters*2, out_channels=cnn_filters*2, kernel_size=3, stride=2))
+        self.cnn_layers.add_module(f"output_layer",
+                                   torch.nn.Conv2d(in_channels=cnn_filters * 2, out_channels=cnn_filters * 2,
+                                                   kernel_size=3, stride=2))
         self.cnn_layers.add_module(f"output_activation", torch.nn.ReLU())
 
         def _get_size_after_flattening(in_size, convolutions):
@@ -93,7 +98,8 @@ class SpectrogramCNN(BaseLightningModel):
             ("input_activation", torch.nn.ReLU())
         ]))
         for i in range(classifier_hidden_layers):
-            self.classifier.add_module(f"hidden_{i + 1}", torch.nn.Linear(classifier_hidden_size, classifier_hidden_size))
+            self.classifier.add_module(f"hidden_{i + 1}",
+                                       torch.nn.Linear(classifier_hidden_size, classifier_hidden_size))
             self.classifier.add_module(f"activation_{i + 1}", torch.nn.ReLU())
             if i % 2 == 0:
                 self.cnn_layers.add_module(f"dropout_{i + 1}", torch.nn.Dropout(p=drop_out_prob))

@@ -1,4 +1,5 @@
 from pytorch_lightning.callbacks import Callback
+import numpy as np
 import wandb
 
 
@@ -33,26 +34,26 @@ class ChartsLogger(Callback):
         self.classes = classes
         self.y = None
         self.y_hat = None
+        self.predictions = None
 
     def on_test_start(self, trainer, pl_module):
-        self.y = []
-        self.y_hat = []
-        print(" ---> start y and y_hat len 0")
+        self.y = np.array([])
+        self.y_hat = np.array([])
+        self.predictions = np.array([])
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        self.y += outputs["y"]
-        self.y_hat += outputs["y_hat"]
+        self.y += np.concatenate((self.y, outputs["y"].numpy()))
+        self.y_hat += np.concatenate((self.y_hat, outputs["y_hat"].numpy()))
+        self.predictions += np.concatenate((self.predictions, outputs["predictions"].numpy()))
 
-        print(f" ---- Batch {batch_idx} ---- \n  len y: {len(outputs['y'])}, len y_hat: {len(outputs['y_hat'])}"
-              f"\n  len y: {len(self.y)}, len y_hat: {len(self.y_hat)}")
-        if batch_idx == 0: print(f" -  y_hat example: {type(outputs['y_hat'])}{outputs['y_hat']}")
-        if batch_idx == 0: print(f" -  y     example: {type(outputs['y'])}{outputs['y']}")
+        if batch_idx == 0: print(f" -  y_hat example: {type(self.predictions)}{self.predictions}")
+        if batch_idx == 0: print(f" -  y     example: {type(self.y_hat)}{self.y_hat}")
 
     def on_test_end(self, trainer, pl_module):
-        print(f"------------ End ------------ \n        len y: {len(self.y)}, len y_hat: {len(self.y_hat)}")
+        print(f"------------ End ------------ \n        shape y: {len(self.y)}, y_hat: {len(self.y_hat)}, predictions: {len(self.predictions)}")
         wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=None,
                                                            y_true=self.y,
-                                                           preds=self.y_hat,
+                                                           preds=self.predictions,
                                                            class_names=self.classes)})
 
         wandb.log({"roc_curve": wandb.plot.roc_curve(self.y, self.y_hat, labels=self.classes)})
