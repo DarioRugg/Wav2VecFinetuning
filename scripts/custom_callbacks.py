@@ -37,12 +37,18 @@ class ChartsLogger(Callback):
     def on_test_start(self, trainer, pl_module):
         self.y = []
         self.y_hat = []
+        print(" ---> start y and y_hat len 0")
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         self.y += outputs["y"]
         self.y_hat += outputs["y_hat"]
 
+        print(f" ---- Batch {batch_idx} ---- \n  len y: {len(outputs['y'])}, len y_hat: {len(outputs['y_hat'])}"
+              f"\n  len y: {len(self.y)}, len y_hat: {len(self.y_hat)}")
+        if batch_idx == 0: print(f" -  y_hat example: {outputs['y_hat']}")
+
     def on_test_end(self, trainer, pl_module):
+        print(f"------------ End ------------ \n        len y: {len(self.y)}, len y_hat: {len(self.y_hat)}")
         wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=None,
                                                            y_true=self.y,
                                                            preds=self.y_hat,
