@@ -31,16 +31,12 @@ class MinLossLogger(Callback):
 
 class ChartsLogger(Callback):
     def __init__(self, classes):
-        super(ChartsLogger, self).__init__()
-        print("----------------------- Lo Ha Chiamato! ----------------------------")
         self.classes = classes
-        print(self.classes, classes)
         self.y = None
         self.y_hat = None
         self.predictions = None
 
     def on_test_start(self, trainer, pl_module):
-        self.classes = ['Guilt', 'Disgust', 'Happiness', 'Neutral', 'Fear', 'Anger', 'Surprise', 'Sadness']
         self.y = np.array([])
         self.y_hat = np.array([]).reshape((0, len(self.classes)))
         self.predictions = np.array([])
