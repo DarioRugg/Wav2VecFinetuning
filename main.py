@@ -60,7 +60,7 @@ def main(cfg: DictConfig):
 
     print("prima")
     charts_logger = ChartsLogger(classes=data_module.get_ordered_classes())
-    print("dopo", charts_logger.classes)
+    print("dopo", charts_logger.classes, data_module.get_ordered_classes())
 
     trainer = Trainer(
         fast_dev_run=cfg.unit_test,

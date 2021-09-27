@@ -34,7 +34,7 @@ class ChartsLogger(Callback):
         super(ChartsLogger, self).__init__()
         print("----------------------- Lo Ha Chiamato! ----------------------------")
         self.classes = classes
-        print(self.classes)
+        print(self.classes, classes)
         self.y = None
         self.y_hat = None
         self.predictions = None
