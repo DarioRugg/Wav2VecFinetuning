@@ -45,7 +45,8 @@ class ChartsLogger(Callback):
 
         print(f" ---- Batch {batch_idx} ---- \n  len y: {len(outputs['y'])}, len y_hat: {len(outputs['y_hat'])}"
               f"\n  len y: {len(self.y)}, len y_hat: {len(self.y_hat)}")
-        if batch_idx == 0: print(f" -  y_hat example: {outputs['y_hat']}")
+        if batch_idx == 0: print(f" -  y_hat example: {type(outputs['y_hat'])}{outputs['y_hat']}")
+        if batch_idx == 0: print(f" -  y     example: {type(outputs['y'])}{outputs['y']}")
 
     def on_test_end(self, trainer, pl_module):
         print(f"------------ End ------------ \n        len y: {len(self.y)}, len y_hat: {len(self.y_hat)}")
