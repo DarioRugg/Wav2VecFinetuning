@@ -79,8 +79,6 @@ def main(cfg: DictConfig):
         model_path_to_test = checkpoint_callback.best_model_path if cfg.train \
             else Path(get_original_cwd(), cfg.model_to_test)
 
-        print("model_path_to_test: ", model_path_to_test, "\ncfg.model_to_test: ", cfg.model_to_test, "\nget_original_cwd: ", get_original_cwd())
-
         # ------------------> Loading best model <-----------------------
         model = get_model_from_checkpoint(cfg, checkpoint_path=model_path_to_test)
 
