@@ -42,10 +42,9 @@ class ChartsLogger(Callback):
         self.predictions = np.array([])
 
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        print(type(outputs["y"].to("cpu").numpy()))
-        self.y += np.concatenate((self.y, outputs["y"].to("cpu").numpy()))
-        self.y_hat += np.concatenate((self.y_hat, outputs["y_hat"].to("cpu").numpy()))
-        self.predictions += np.concatenate((self.predictions, outputs["predictions"].to("cpu").numpy()))
+        self.y = np.concatenate((self.y, outputs["y"].to("cpu").numpy()))
+        self.y_hat = np.concatenate((self.y_hat, outputs["y_hat"].to("cpu").numpy()))
+        self.predictions = np.concatenate((self.predictions, outputs["predictions"].to("cpu").numpy()))
 
         if batch_idx == 0: print(f" -  y_hat example: {type(self.predictions)}{self.predictions}")
         if batch_idx == 0: print(f" -  y     example: {type(self.y_hat)}{self.y_hat}")
