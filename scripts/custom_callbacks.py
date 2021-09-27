@@ -46,11 +46,7 @@ class ChartsLogger(Callback):
         self.y_hat = np.concatenate((self.y_hat, outputs["y_hat"].to("cpu").numpy()))
         self.predictions = np.concatenate((self.predictions, outputs["predictions"].to("cpu").numpy()))
 
-        if batch_idx == 0: print(f" -  y_hat example: {type(self.predictions)}{self.predictions}")
-        if batch_idx == 0: print(f" -  y     example: {type(self.y_hat)}{self.y_hat}")
-
     def on_test_end(self, trainer, pl_module):
-        print(f"------------ End ------------ \n        shape y: {len(self.y)}, y_hat: {len(self.y_hat)}, predictions: {len(self.predictions)}")
         wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=None,
                                                            y_true=self.y,
                                                            preds=self.predictions,
