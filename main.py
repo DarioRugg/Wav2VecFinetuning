@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 
 import hydra
-from hydra.utils import get_original_cwd
 from omegaconf import DictConfig, OmegaConf
 
 from scripts.lightning_dataloaders import DataModule
@@ -77,7 +76,7 @@ def main(cfg: DictConfig):
         # if was done also the training phase use the best model just found,
         # if we are just testing without training the best model is the one specified in the config
         model_path_to_test = checkpoint_callback.best_model_path if cfg.train \
-            else Path(get_original_cwd(), cfg.model_to_test)
+            else Path(cfg.model_to_test)
 
         # ------------------> Loading best model <-----------------------
         model = get_model_from_checkpoint(cfg, checkpoint_path=model_path_to_test)
