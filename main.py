@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 
 import hydra
+from hydra.utils import get_original_cwd
 from omegaconf import DictConfig, OmegaConf
 
 from scripts.lightning_dataloaders import DataModule
@@ -22,7 +23,7 @@ logger = logging.getLogger("config_logger")
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
 
-@hydra.main(config_path=Path(".", "Assets", "Config"), config_name="config.yaml")
+@hydra.main(config_path=Path(".", "Assets", "Config"), config_name="wav2vec_cls_best.yaml")  # , config_name="config.yaml")
 def main(cfg: DictConfig):
     # if it's just an home test we run in offline mode
     if cfg.simulation_name == "home_test":
@@ -75,8 +76,9 @@ def main(cfg: DictConfig):
     if cfg.test:
         # if was done also the training phase use the best model just found,
         # if we are just testing without training the best model is the one specified in the config
-        model_path_to_test = checkpoint_callback.best_model_path if cfg.train else cfg.model_to_test
-        
+        model_path_to_test = Path(get_original_cwd(), checkpoint_callback.best_model_path) if cfg.train \
+            else cfg.model_to_test
+
         # ------------------> Loading best model <-----------------------
         model = get_model_from_checkpoint(cfg, checkpoint_path=model_path_to_test)
 
