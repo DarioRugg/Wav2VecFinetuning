@@ -73,8 +73,12 @@ def main(cfg: DictConfig):
         trainer.fit(model=model, datamodule=data_module)
 
     if cfg.test:
+        # if was done also the training phase use the best model just found,
+        # if we are just testing without training the best model is the one specified in the config
+        model_path_to_test = checkpoint_callback.best_model_path if cfg.train else cfg.model_to_test
+        
         # ------------------> Loading best model <-----------------------
-        model = get_model_from_checkpoint(cfg, checkpoint_path=checkpoint_callback.best_model_path)
+        model = get_model_from_checkpoint(cfg, checkpoint_path=model_path_to_test)
 
         # ------------------> Testing <-----------------------
         trainer.test(model=model, datamodule=data_module)

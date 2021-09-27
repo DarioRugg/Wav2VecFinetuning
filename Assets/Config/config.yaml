@@ -1,6 +1,7 @@
 simulation_name: server_test
 train: true
 test: false
+model_to_test: path
 unit_test: false # [false, true, int]
 
 early_stopping_patience: 8
