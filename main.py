@@ -58,7 +58,9 @@ def main(cfg: DictConfig):
     # logging the best val loss
     min_val_loss_logger = MinLossLogger()
 
+    print("prima")
     charts_logger = ChartsLogger(classes=data_module.get_ordered_classes())
+    print("dopo", charts_logger.classes)
 
     trainer = Trainer(
         fast_dev_run=cfg.unit_test,
