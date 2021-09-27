@@ -47,11 +47,10 @@ class ChartsLogger(Callback):
         self.predictions = np.concatenate((self.predictions, outputs["predictions"].to("cpu").numpy()))
 
     def on_test_end(self, trainer, pl_module):
-        print("------------------------------classes: ", self.classes)
+
         wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=None,
                                                            y_true=self.y,
                                                            preds=self.predictions,
-                                                           class_names=['Guilt', 'Disgust', 'Happiness', 'Neutral', 'Fear', 'Anger', 'Surprise', 'Sadness'])})
-                                                           # class_names=self.classes)})
+                                                           class_names=self.classes)})
 
         wandb.log({"roc_curve": wandb.plot.roc_curve(self.y, self.y_hat, labels=self.classes)})
