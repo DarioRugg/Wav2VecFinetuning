@@ -59,7 +59,7 @@ def main(cfg: DictConfig):
     min_val_loss_logger = MinLossLogger()
 
     charts_logger = ChartsLogger(classes=data_module.get_ordered_classes())
-    print(charts_logger.classes)
+    print(" -------- classes: ", charts_logger.classes)
 
     trainer = Trainer(
         fast_dev_run=cfg.unit_test,
