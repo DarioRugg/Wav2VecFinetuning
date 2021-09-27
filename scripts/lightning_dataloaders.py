@@ -18,13 +18,12 @@ class DataModule(pl.LightningDataModule):
         super().__init__()
         self.cfg = config
 
-        self.ordered_class_names = None
-
+        # fetching the ordered class names of the dataset
+        self.ordered_class_names = self._get_dataset().get_ordered_classes()
 
         self.train, self.val, self.test = None, None, None
 
-    def setup(self, stage=None):
-        # ------------------> Dataset <-----------------------
+    def _get_dataset(self):
         if self.cfg.dataset.name.lower() in ["demos", "demos_test"]:
             dataset = DEMoSDataset(root_dir=Path(get_original_cwd(), self.cfg.path.data, self.cfg.dataset.dir),
                                    padding_cropping_size=self.cfg.dataset.padding_cropping,
@@ -37,9 +36,11 @@ class DataModule(pl.LightningDataModule):
                                      sampling_rate=self.cfg.dataset.sampling_rate)
         else:
             raise Exception("Requested dataset, doesn't exist yet")
+        return dataset
 
-        # fetching the ordered class names of the dataset
-        self.ordered_class_names = dataset.get_ordered_classes()
+    def setup(self, stage=None):
+        # ------------------> Dataset <-----------------------
+        dataset = self._get_dataset()
 
         # ------------------> Split < -----------------------
         if self.cfg.dataset.speaker_split:
