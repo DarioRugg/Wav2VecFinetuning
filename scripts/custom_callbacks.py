@@ -47,6 +47,7 @@ class ChartsLogger(Callback):
         self.predictions = np.concatenate((self.predictions, outputs["predictions"].to("cpu").numpy()))
 
     def on_test_end(self, trainer, pl_module):
+        print("------------------------------classes: ", self.classes)
         wandb.log({"conf_mat": wandb.plot.confusion_matrix(probs=None,
                                                            y_true=self.y,
                                                            preds=self.predictions,
