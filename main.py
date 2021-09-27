@@ -22,7 +22,7 @@ logger = logging.getLogger("config_logger")
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
 
-@hydra.main(config_path=Path(".", "Assets", "Config"), config_name="wav2vec_cls_best.yaml")  # , config_name="config.yaml")
+@hydra.main(config_path=Path(".", "Assets", "Config"), config_name="config.yaml")  # , config_name="config.yaml")
 def main(cfg: DictConfig):
     # if it's just an home test we run in offline mode
     if cfg.simulation_name == "home_test":
