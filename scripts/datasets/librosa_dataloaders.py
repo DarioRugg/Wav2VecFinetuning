@@ -116,7 +116,6 @@ class DEMoSDataset(BaseDataset):
 
         self.classes = sorted(list(classes_dict.keys()))
         self.ordered_class_names = list(map(lambda item: item[1], sorted(classes_dict.items())))
-        print(self.ordered_class_names)
         self.classes_dict = classes_dict
 
         paths = list(map(lambda fname: fname, sorted(demos_dir.iterdir()))) + list(
