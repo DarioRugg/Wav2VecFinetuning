@@ -31,6 +31,7 @@ class MinLossLogger(Callback):
 
 class ChartsLogger(Callback):
     def __init__(self, classes):
+        super(ChartsLogger, self).__init__()
         self.classes = classes
         self.y = None
         self.y_hat = None
