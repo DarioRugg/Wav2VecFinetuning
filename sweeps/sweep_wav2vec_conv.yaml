@@ -30,6 +30,7 @@ parameters:
     max: 3
   cnn_filters:
     values:
+      - 12
       - 16
       - 20
       - 24
