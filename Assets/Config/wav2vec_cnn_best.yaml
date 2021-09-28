@@ -1,0 +1,15 @@
+simulation_name: "Models Tests"
+
+model_to_test: /workspace/Wav2VecFinetuning/Assets/Logs/best_models/
+
+# just testing with this config
+train: false
+test: true
+
+# best model configuration configuration
+
+
+defaults:
+  # for coloring logs:
+  - hydra/hydra_logging: colorlog
+  - hydra/job_logging: colorlog
