@@ -18,7 +18,7 @@ parameters:
       - 4
       - 8
       - 12
-      - 20
+      - 16
   epochs:
     min: 25
     max: 40
