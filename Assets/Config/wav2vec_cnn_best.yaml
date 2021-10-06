@@ -18,7 +18,7 @@ model:
   name: Wav2Vec
   epochs: 41
   learning_rate: 6.550682429198519e-05
-  option: all
+  option: cnn_avg
   finetuning: true
   hidden_layers: 0
   hidden_size: null
