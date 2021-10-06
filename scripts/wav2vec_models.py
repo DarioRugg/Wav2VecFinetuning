@@ -159,9 +159,9 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
         #     if i % 2 == 0:
         #         self.cnn_layers.add_module(f"dropout_{i + 1}", nn.Dropout(p=drop_out_prob))
         #
-        # self.cnn_layers.add_module("output_layer",
-        #                            nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters * 2, kernel_size=3,
-        #                                      stride=2))
+        self.cnn_layers.add_module("output_layer",
+                                   nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters * 2, kernel_size=3,
+                                             stride=2))
         # self.cnn_layers.add_module("global_average_pooling", nn.AdaptiveAvgPool2d(output_size=(1, 1)))
 
     def forward(self, x):
