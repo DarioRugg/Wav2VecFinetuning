@@ -169,6 +169,8 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
             # the features are like a one channel image
             features = self.pretrained_model(x)
 
+
+        print("tokens", features.shape)
         # we need to add the first channel to the "image"
         features = self.cnn_layers(torch.unsqueeze(features, dim=1))
         print("before", features.shape)
