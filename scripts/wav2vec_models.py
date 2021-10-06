@@ -177,7 +177,7 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
         print("before", features.shape)
         # we feed this image in the cnn_layers that gives the classification tensor
         y_pred = torch.reshape(features, shape=(features.shape[0], features.shape[1]))
-        print("after", features.shape)
+        print("after", y_pred.shape)
         return y_pred
 
 
