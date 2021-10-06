@@ -151,17 +151,17 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
             ("input_layer", nn.Conv2d(in_channels=1, out_channels=cnn_filters, kernel_size=3, stride=2)),
             ("input_activation", nn.ReLU())
         ]))
-        for i in range(cnn_hidden_layers):
-            self.cnn_layers.add_module(f"hidden_{i + 1}",
-                                       nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3,
-                                                 stride=2))
-            self.cnn_layers.add_module(f"activation_{i + 1}", nn.ReLU())
-            if i % 2 == 0:
-                self.cnn_layers.add_module(f"dropout_{i + 1}", nn.Dropout(p=drop_out_prob))
-
-        self.cnn_layers.add_module("output_layer",
-                                   nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters * 2, kernel_size=3,
-                                             stride=2))
+        # for i in range(cnn_hidden_layers):
+        #     self.cnn_layers.add_module(f"hidden_{i + 1}",
+        #                                nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3,
+        #                                          stride=2))
+        #     self.cnn_layers.add_module(f"activation_{i + 1}", nn.ReLU())
+        #     if i % 2 == 0:
+        #         self.cnn_layers.add_module(f"dropout_{i + 1}", nn.Dropout(p=drop_out_prob))
+        #
+        # self.cnn_layers.add_module("output_layer",
+        #                            nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters * 2, kernel_size=3,
+        #                                      stride=2))
         # self.cnn_layers.add_module("global_average_pooling", nn.AdaptiveAvgPool2d(output_size=(1, 1)))
 
     def forward(self, x):
