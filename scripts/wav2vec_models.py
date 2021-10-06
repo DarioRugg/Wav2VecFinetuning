@@ -171,8 +171,10 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
 
         # we need to add the first channel to the "image"
         features = self.cnn_layers(torch.unsqueeze(features, dim=1))
+        print("before", features.shape)
         # we feed this image in the cnn_layers that gives the classification tensor
         y_pred = torch.reshape(features, shape=(features.shape[0], features.shape[1]))
+        print("after", features.shape)
         return y_pred
 
 
