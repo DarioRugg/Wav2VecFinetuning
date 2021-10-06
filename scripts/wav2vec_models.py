@@ -162,7 +162,7 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
         self.cnn_layers.add_module("output_layer",
                                    nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters * 2, kernel_size=3,
                                              stride=2))
-        self.cnn_layers.add_module("global_average_pooling", nn.AdaptiveAvgPool2d(output_size=(1, 1)))
+        # self.cnn_layers.add_module("global_average_pooling", nn.AdaptiveAvgPool2d(output_size=(1, 1)))
 
     def forward(self, x):
         with torch.enable_grad() if self.finetune_pretrained else torch.no_grad():
