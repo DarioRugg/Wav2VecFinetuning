@@ -11,20 +11,20 @@ unit_test: false
 early_stopping_patience: 12
 machine:
   workers: 24
-  training_batches: 6
+  training_batches: 8
   testing_batches: 16
   gpu: 0
 model:
   name: Wav2Vec
-  epochs: 41
-  learning_rate: 6.550682429198519e-05
+  epochs: 27
+  learning_rate: 0.00041023786047156687
   option: cnn_avg
   finetuning: true
   hidden_layers: 0
   hidden_size: null
-  cnn_hidden_layers: 1
-  cnn_filters: 16
-  drop_out_prob: 0.03
+  cnn_hidden_layers: 3
+  cnn_filters: 24
+  drop_out_prob: 0.07946957040339891
 dataset:
   name: DEMoS
   dir: DEMoS_dataset
