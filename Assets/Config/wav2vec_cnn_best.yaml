@@ -1,13 +1,42 @@
 simulation_name: "Models Tests"
 
-model_to_test: /workspace/Wav2VecFinetuning/Assets/Logs/best_models/
+model_to_test: /workspace/Wav2VecFinetuning/Assets/Logs/best_models/wav_feature/14-29-05/models/checkpoint-model-epoch=15-val_loss=1.81.ckpt
 
 # just testing with this config
 train: false
 test: true
 
 # best model configuration configuration
-
+unit_test: false
+early_stopping_patience: 12
+machine:
+  workers: 24
+  training_batches: 6
+  testing_batches: 16
+  gpu: 0
+model:
+  name: Wav2Vec
+  epochs: 41
+  learning_rate: 6.550682429198519e-05
+  option: all
+  finetuning: true
+  hidden_layers: 0
+  hidden_size: null
+  cnn_hidden_layers: 1
+  cnn_filters: 16
+  drop_out_prob: 0.03
+dataset:
+  name: DEMoS
+  dir: DEMoS_dataset
+  number_of_classes: 8
+  speaker_split: true
+  padding_cropping: 72562
+  sampling_rate: 16000
+  spectrogram: false
+  split_size: 0.8
+  split_seed: 1234
+path:
+  data: ./Assets/Data
 
 defaults:
   # for coloring logs:
