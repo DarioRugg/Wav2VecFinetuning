@@ -151,14 +151,14 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
             ("input_layer", nn.Conv2d(in_channels=1, out_channels=cnn_filters, kernel_size=3, stride=2)),
             ("input_activation", nn.ReLU())
         ]))
-        # for i in range(cnn_hidden_layers):
-        #     self.cnn_layers.add_module(f"hidden_{i + 1}",
-        #                                nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3,
-        #                                          stride=2))
-        #     self.cnn_layers.add_module(f"activation_{i + 1}", nn.ReLU())
-        #     if i % 2 == 0:
-        #         self.cnn_layers.add_module(f"dropout_{i + 1}", nn.Dropout(p=drop_out_prob))
-        #
+        for i in range(cnn_hidden_layers):
+            self.cnn_layers.add_module(f"hidden_{i + 1}",
+                                       nn.Conv2d(in_channels=cnn_filters, out_channels=cnn_filters, kernel_size=3,
+                                                 stride=2))
+            self.cnn_layers.add_module(f"activation_{i + 1}", nn.ReLU())
+            if i % 2 == 0:
+                self.cnn_layers.add_module(f"dropout_{i + 1}", nn.Dropout(p=drop_out_prob))
+
         self.cnn_layers.add_module("output_layer",
                                    nn.Conv2d(in_channels=cnn_filters, out_channels=num_classes, kernel_size=3,
                                              stride=2))
@@ -169,15 +169,10 @@ class Wav2VecFeatureExtractorGAP(BaseLightningModel):
             # the features are like a one channel image
             features = self.pretrained_model(x)
 
-
-        print("tokens", features.shape)
-        print("after unsqueeze", torch.unsqueeze(features, dim=1).shape)
         # we need to add the first channel to the "image"
         features = self.cnn_layers(torch.unsqueeze(features, dim=1))
-        print("before", features.shape)
         # we feed this image in the cnn_layers that gives the classification tensor
         y_pred = torch.reshape(features, shape=(features.shape[0], features.shape[1]))
-        print("after", y_pred.shape)
         return y_pred
 
 
