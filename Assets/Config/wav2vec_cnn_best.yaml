@@ -1,6 +1,6 @@
 simulation_name: "Models Tests"
 
-model_to_test: /workspace/Wav2VecFinetuning/Assets/Logs/best_models/wav_feature/14-29-05/models/checkpoint-model-epoch=15-val_loss=1.81.ckpt
+model_to_test: /workspace/Wav2VecFinetuning/Assets/Logs/best_models/wav_feature/05-39-16/models/checkpoint-model-epoch=17-val_loss=1.79.ckpt
 
 # just testing with this config
 train: false
@@ -16,15 +16,15 @@ machine:
   gpu: 0
 model:
   name: Wav2Vec
-  epochs: 27
-  learning_rate: 0.00041023786047156687
+  epochs: 33
+  learning_rate: 0.00042515461351180447
   option: cnn_avg
   finetuning: true
   hidden_layers: 0
   hidden_size: null
   cnn_hidden_layers: 3
-  cnn_filters: 24
-  drop_out_prob: 0.07946957040339891
+  cnn_filters: 12
+  drop_out_prob: 0.053375279437205214
 dataset:
   name: DEMoS
   dir: DEMoS_dataset
