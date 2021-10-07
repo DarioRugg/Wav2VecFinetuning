@@ -1,6 +1,6 @@
 simulation_name: "Models Tests"
 
-model_to_test: /workspace/Wav2VecFinetuning/Assets/Logs/best_models/wav_feature/05-39-16/models/checkpoint-model-epoch=17-val_loss=1.79.ckpt
+model_to_test: /workspace/Wav2VecFinetuning/Assets/Logs/best_models/wav_feature/05-39-16/models/checkpoint-model-epoch=06-val_loss=1.79.ckpt
 
 # just testing with this config
 train: false
